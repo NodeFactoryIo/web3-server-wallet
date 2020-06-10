@@ -23,7 +23,7 @@
     "build:node": "babel --no-babelrc --config-file ./babel.config.json src --copy-files -x .ts -d dist --source-maps",
     "build:web": "babel --no-babelrc --config-file ./babel.web.config.json src --copy-files -x .ts -d lib --source-maps",
     "build:types": "tsc --declaration --outDir dist --emitDeclarationOnly",
-    "check-types": "tsc --incremental",
+    "check-types": "tsc --noEmit",
     "lint": "eslint --ext .ts src/",
     "pretest": "yarn check-types",
     "test": "yarn run test:node && yarn run test:web",
