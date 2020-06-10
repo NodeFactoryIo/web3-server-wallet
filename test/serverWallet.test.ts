@@ -14,7 +14,6 @@ describe("Server wallet sendTransaction", function () {
   let providerStub: SinonStubbedInstance<Provider>;
 
   beforeEach(function () {
-    sinon.stub();
     signingKey = new SigningKey(
       "E5B21F1D68386B32407F2B63F49EE74CDAE4A80EE346EB90205B62D8BCDE9920"
     )
