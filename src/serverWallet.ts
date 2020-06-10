@@ -15,7 +15,7 @@ export class ServerWeb3Wallet extends Wallet {
     this.walletStorage = walletStorage;
   };
 
-  private async getSafeGasPrice(): Promise<BigNumber> {
+  private async getSafeLowGasPrice(): Promise<BigNumber> {
     const response = await axios.get(GAS_PRICE_API);
     return new BigNumber(response.data.safeLow);
   }
@@ -39,14 +39,13 @@ export class ServerWeb3Wallet extends Wallet {
     
   public async sendTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
     if(tx.gasPrice == null) {
-      tx.gasPrice = await this.getSafeGasPrice();
+      tx.gasPrice = await this.getSafeLowGasPrice();
     }
     if(tx.nonce == null){
       tx.nonce = await this.getNonce();
     }
 
     const txResponse = await this.getTransactionResponse(tx);
-    
     if(txResponse.hash) {
       await this.walletStorage.saveTransaction(txResponse);
     }
