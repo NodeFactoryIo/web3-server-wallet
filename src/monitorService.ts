@@ -1,10 +1,11 @@
 import {ServerWeb3Wallet} from "./serverWallet";
 import {TransactionResponse} from "ethers/providers";
+import {BigNumber} from "ethers/utils";
 
 export class TxMonitorService {
   private wallet: ServerWeb3Wallet;
   private intervalId?: NodeJS.Timeout;
-  
+
   constructor(wallet: ServerWeb3Wallet) {
     this.wallet = wallet;
   };
@@ -15,11 +16,11 @@ export class TxMonitorService {
     }
 
     this.intervalId = setInterval(
-      this.checkTransactions.bind(this), 
+      this.checkTransactions.bind(this),
       interval
     )
   }
-  
+
   public async stop(): Promise<void> {
     if(this.intervalId) {
       clearInterval(
@@ -36,15 +37,19 @@ export class TxMonitorService {
         continue;
       }
 
-      if(this.transactionIsOld(transaction)) {
-        this.resendTransaction(transaction);
+      if(this.transactionIsOld(transaction) || this.transactionIsDropped(transaction)) {
+        await this.resendTransaction(transaction);
         break;
       }
     }
   }
 
   private transactionIsConfirmed(transaction: TransactionResponse): boolean {
-    return transaction.confirmations > 11;
+    if(transaction.blockNumber) {
+      return true;
+    }
+
+    return false;
   }
 
   private transactionIsOld(transaction: TransactionResponse): boolean {
@@ -57,9 +62,14 @@ export class TxMonitorService {
     return false;
   }
 
+  private transactionIsDropped(transaction: TransactionResponse): boolean {
+    return false;
+  }
+
   private async resendTransaction(transaction: TransactionResponse): Promise<void> {
-    this.wallet.walletStorage.deleteTransaction(transaction);
-    this.wallet.sendTransaction(transaction)
+    await this.wallet.walletStorage.deleteTransaction(transaction);
+    transaction.gasPrice = new BigNumber(transaction.gasPrice.toNumber() * 1.5);
+    await this.wallet.sendTransaction(transaction)
   }
 
 }

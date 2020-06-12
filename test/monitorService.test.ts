@@ -4,6 +4,7 @@ import {ServerWeb3Wallet} from "../src/serverWallet";
 import {TransactionResponse} from "ethers/providers";
 import {TxMonitorService} from "../src/monitorService";
 import {IWalletStorage} from "../src/@types/wallet";
+import {BigNumber} from "ethers/utils";
 
 describe("Transaction monitor service", function () {
 
@@ -33,7 +34,7 @@ describe("Transaction monitor service", function () {
       expect(stub.callCount).to.be.deep.equal(1);
       done();
     }, 30)
-  });  
+  });
 
   it("Start checks transactions every given interval", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
@@ -47,8 +48,8 @@ describe("Transaction monitor service", function () {
       expect(spy.callCount).to.be.deep.equal(2);
       done();
     }, 50)
-    
-  });  
+
+  });
 
   it("Stop checks if interval exists", function () {
     const spy = sinon.spy(clearInterval)
@@ -56,13 +57,13 @@ describe("Transaction monitor service", function () {
     txMonitorService.stop();
 
     expect(spy.callCount).to.be.deep.equal(0)
-  });  
+  });
 
   it("Check transaction ignores transactions that are confirmed", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {confirmations: 10, timestamp: new Date().getTime()} as TransactionResponse,
-        {confirmations: 13, timestamp: new Date().getTime()} as TransactionResponse,
+        {timestamp: new Date().getTime()} as TransactionResponse,
+        {blockNumber: 13, timestamp: new Date().getTime()} as TransactionResponse,
       ];
     }
     const spy = sinon.spy(txMonitorService as any, "transactionIsOld");
@@ -74,14 +75,14 @@ describe("Transaction monitor service", function () {
       expect(spy.callCount).to.be.deep.equal(1);
       done();
     }, 30)
-    
-  });  
+
+  });
 
   it("Check transaction ignores other transactions after resending", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {confirmations: 10, timestamp: new Date().getTime() - 300} as TransactionResponse,
-        {confirmations: 10, timestamp: new Date().getTime() - 300} as TransactionResponse,
+        {nonce: 1, gasPrice: new BigNumber(12), timestamp: new Date().getTime() - 300} as TransactionResponse,
+        {nonce: 2, gasPrice: new BigNumber(12), timestamp: new Date().getTime() - 300} as TransactionResponse,
       ];
     }
     walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
@@ -96,14 +97,14 @@ describe("Transaction monitor service", function () {
       expect(stub.callCount).to.be.deep.equal(1);
       done();
     }, 30)
-    
-  });  
-  
+
+  });
+
   it("Check transaction resends transaction that is older than 3 minutes", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {confirmations: 10, timestamp: new Date().getTime()} as TransactionResponse,
-        {confirmations: 10, timestamp: new Date().getTime() - 300} as TransactionResponse,
+        {nonce: 1, gasPrice: new BigNumber(12), timestamp: new Date().getTime()} as TransactionResponse,
+        {nonce: 2, gasPrice: new BigNumber(12), timestamp: new Date().getTime() - 300} as TransactionResponse,
       ];
     }
     walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
@@ -120,7 +121,7 @@ describe("Transaction monitor service", function () {
       expect(loopSpy.callCount).to.be.deep.equal(2);
       done();
     }, 30)
-    
-  });  
+
+  });
 
 });

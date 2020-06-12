@@ -15,28 +15,6 @@ export class ServerWeb3Wallet extends Wallet {
     this.walletStorage = walletStorage;
   };
 
-  private async getSafeLowGasPrice(): Promise<BigNumber> {
-    const response = await axios.get(GAS_PRICE_API);
-    return new BigNumber(response.data.safeLow);
-  }
-
-  private async getNonce(): Promise<BigNumber> {
-    const transactions = await this.walletStorage.getTransactions();
-    const transactionCount = await this.getTransactionCount("pending");
-
-    if(transactions[0].nonce !== transactionCount) {
-      return new BigNumber(transactions[0].nonce);
-    } 
-
-    return new BigNumber(transactions[0].nonce + 1);
-  }
-
-  private async getTransactionResponse(tx: TransactionRequest): Promise<TransactionResponse> {
-    const populatedTx = await populateTransaction(tx, this.provider, this.address)
-    const signedTx = await this.sign(populatedTx);
-    return await this.provider.sendTransaction(signedTx);
-  }
-    
   public async sendTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
     if(tx.gasPrice == null) {
       tx.gasPrice = await this.getSafeLowGasPrice();
@@ -46,11 +24,30 @@ export class ServerWeb3Wallet extends Wallet {
     }
 
     const txResponse = await this.getTransactionResponse(tx);
-    if(txResponse.hash) {
-      await this.walletStorage.saveTransaction(txResponse);
-    }
-
+    await this.walletStorage.saveTransaction(txResponse);
     return txResponse;
   }
-    
+
+  private async getSafeLowGasPrice(): Promise<BigNumber> {
+    const response = await axios.get(GAS_PRICE_API);
+    return new BigNumber(response.data.safeLow / 10);
+  }
+
+  private async getNonce(): Promise<BigNumber> {
+    const transactions = await this.walletStorage.getTransactions();
+    const transactionCount = await this.getTransactionCount("pending");
+
+    if(transactions[transactions.length - 1].nonce + 1 !== transactionCount) {
+      return new BigNumber(transactions[transactions.length - 1].nonce);
+    }
+
+    return new BigNumber(transactionCount);
+  }
+
+  private async getTransactionResponse(tx: TransactionRequest): Promise<TransactionResponse> {
+    const populatedTx = await populateTransaction(tx, this.provider, this.address)
+    const signedTx = await this.sign(populatedTx);
+    return await this.provider.sendTransaction(signedTx);
+  }
+
 }

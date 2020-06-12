@@ -25,6 +25,9 @@ describe("Server wallet sendTransaction", function () {
       walletStorage,
       providerStub
     )
+    walletStorage.saveTransaction = async function saveTransaction(txResponse: TransactionResponse){
+      return;
+    }
   });
 
   afterEach(function () {
@@ -48,7 +51,7 @@ describe("Server wallet sendTransaction", function () {
     const txResponse = await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].gasPrice).to.be.equal(20.00);
-  });  
+  });
 
   it("Assigns safe low gas price from eth gas station if price not sent", async function () {
     sinon.stub(axios, "get").resolves(
@@ -68,7 +71,7 @@ describe("Server wallet sendTransaction", function () {
 
     const txResponse = await web3Wallet.sendTransaction(tx);
 
-    expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(10.0);
+    expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(1.0);
   });
 
   it("Uses default nonce if sent", async function () {
@@ -92,7 +95,7 @@ describe("Server wallet sendTransaction", function () {
 
   it("Assigns highest nonce + 1 if transactions nonce and transaction count match", async function () {
     sinon.stub(web3Wallet, "getTransactionCount").resolves(
-      2
+      3
     );
     walletStorage.getTransactions = async function getTransactions(){
       return [
@@ -118,12 +121,12 @@ describe("Server wallet sendTransaction", function () {
 
   it("Uses gap nonce if transactions nonce and transaction count do not match", async function () {
     sinon.stub(web3Wallet, "getTransactionCount").resolves(
-      3
+      4
     );
     walletStorage.getTransactions = async function getTransactions(){
       return [
-        {nonce: 2} as unknown as TransactionResponse
-      ]
+        {nonce: 2}
+      ] as TransactionResponse[]
     }
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"
@@ -139,13 +142,10 @@ describe("Server wallet sendTransaction", function () {
 
     const txResponse = await web3Wallet.sendTransaction(tx);
 
-    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(2);
+    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(3);
   });
 
-  it("Transaction response with hash stored into wallet storage", async function () {
-    walletStorage.saveTransaction = async function saveTransaction(txResponse: TransactionResponse){
-      return;
-    }
+  it("Transaction response stored into wallet storage", async function () {
     const spy = sinon.spy(walletStorage, "saveTransaction");
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"
