@@ -1,6 +1,7 @@
 import {ServerWeb3Wallet} from "./serverWallet";
 import {TransactionResponse} from "ethers/providers";
 import {BigNumber} from "ethers/utils";
+import { SavedTransactionResponse } from "./@types/wallet";
 
 export class TxMonitorService {
   private wallet: ServerWeb3Wallet;
@@ -44,7 +45,7 @@ export class TxMonitorService {
     }
   }
 
-  private transactionIsConfirmed(transaction: TransactionResponse): boolean {
+  private transactionIsConfirmed(transaction: SavedTransactionResponse): boolean {
     if(transaction.blockNumber) {
       return true;
     }
@@ -52,21 +53,19 @@ export class TxMonitorService {
     return false;
   }
 
-  private transactionIsOld(transaction: TransactionResponse): boolean {
-    if(transaction.timestamp) {
-      if(new Date().getTime() - transaction.timestamp > 180) {
-        return true;
-      }
+  private transactionIsOld(transaction: SavedTransactionResponse): boolean {
+    if(new Date().getTime() - transaction.submitTime > 180) {
+      return true;
     }
 
     return false;
   }
 
-  private transactionIsDropped(transaction: TransactionResponse): boolean {
+  private transactionIsDropped(transaction: SavedTransactionResponse): boolean {
     return false;
   }
 
-  private async resendTransaction(transaction: TransactionResponse): Promise<void> {
+  private async resendTransaction(transaction: SavedTransactionResponse): Promise<void> {
     await this.wallet.walletStorage.deleteTransaction(transaction);
     transaction.gasPrice = new BigNumber(transaction.gasPrice.toNumber() * 1.5);
     await this.wallet.sendTransaction(transaction)

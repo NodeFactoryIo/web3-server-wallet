@@ -3,7 +3,7 @@ import axios from "axios";
 import sinon, {SinonStubbedInstance} from "sinon";
 import {SigningKey, BigNumber, Transaction} from "ethers/utils";
 import {ServerWeb3Wallet} from "../src/serverWallet";
-import {IWalletStorage} from "../src/@types/wallet";
+import {IWalletStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {Provider, TransactionResponse} from "ethers/providers";
 
 describe("Server wallet sendTransaction", function () {
@@ -99,7 +99,7 @@ describe("Server wallet sendTransaction", function () {
     );
     walletStorage.getTransactions = async function getTransactions(){
       return [
-        {nonce: 2} as unknown as TransactionResponse
+        {nonce: 2} as unknown as SavedTransactionResponse
       ]
     }
     const transactionResponseStub = sinon.stub(
@@ -126,7 +126,7 @@ describe("Server wallet sendTransaction", function () {
     walletStorage.getTransactions = async function getTransactions(){
       return [
         {nonce: 2}
-      ] as TransactionResponse[]
+      ] as SavedTransactionResponse[]
     }
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"
@@ -149,7 +149,7 @@ describe("Server wallet sendTransaction", function () {
     const spy = sinon.spy(walletStorage, "saveTransaction");
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"
-    ).resolves({hash: "hash"} as TransactionResponse)
+    ).resolves({hash: "hash"} as SavedTransactionResponse)
     const tx = {
       to: "to-address",
       gasLimit: 21000,

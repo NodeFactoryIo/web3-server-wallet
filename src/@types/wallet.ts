@@ -5,10 +5,15 @@ export interface IWalletSource {
   assignWallet(): Promise<SigningKey>;
 }
 
+// eslint-disable-next-line @typescript-eslint/interface-name-prefix
+export interface SavedTransactionResponse extends TransactionResponse {
+  submitTime: number;
+}
+
 export interface IWalletStorage {
   publicKey: string;
 
-  getTransactions(): Promise<TransactionResponse[]>;
+  getTransactions(): Promise<SavedTransactionResponse[]>;
   saveTransaction(tx: TransactionResponse): Promise<void>;
   deleteTransaction(tx: TransactionResponse): Promise<void>;
 }

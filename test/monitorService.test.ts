@@ -3,7 +3,7 @@ import sinon, {SinonStubbedInstance} from "sinon";
 import {ServerWeb3Wallet} from "../src/serverWallet";
 import {TransactionResponse} from "ethers/providers";
 import {TxMonitorService} from "../src/monitorService";
-import {IWalletStorage} from "../src/@types/wallet";
+import {IWalletStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {BigNumber} from "ethers/utils";
 
 describe("Transaction monitor service", function () {
@@ -38,7 +38,7 @@ describe("Transaction monitor service", function () {
 
   it("Start checks transactions every given interval", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
-      return [] as TransactionResponse[];
+      return [] as SavedTransactionResponse[];
     }
     const spy = sinon.spy(txMonitorService as any, "checkTransactions");
 
@@ -62,8 +62,8 @@ describe("Transaction monitor service", function () {
   it("Check transaction ignores transactions that are confirmed", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {timestamp: new Date().getTime()} as TransactionResponse,
-        {blockNumber: 13, timestamp: new Date().getTime()} as TransactionResponse,
+        {submitTime: new Date().getTime()} as SavedTransactionResponse,
+        {blockNumber: 13, submitTime: new Date().getTime()} as SavedTransactionResponse,
       ];
     }
     const spy = sinon.spy(txMonitorService as any, "transactionIsOld");
@@ -81,8 +81,8 @@ describe("Transaction monitor service", function () {
   it("Check transaction ignores other transactions after resending", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {nonce: 1, gasPrice: new BigNumber(12), timestamp: new Date().getTime() - 300} as TransactionResponse,
-        {nonce: 2, gasPrice: new BigNumber(12), timestamp: new Date().getTime() - 300} as TransactionResponse,
+        {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
+        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
       ];
     }
     walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
@@ -103,8 +103,8 @@ describe("Transaction monitor service", function () {
   it("Check transaction resends transaction that is older than 3 minutes", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {nonce: 1, gasPrice: new BigNumber(12), timestamp: new Date().getTime()} as TransactionResponse,
-        {nonce: 2, gasPrice: new BigNumber(12), timestamp: new Date().getTime() - 300} as TransactionResponse,
+        {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime()} as SavedTransactionResponse,
+        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
       ];
     }
     walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
