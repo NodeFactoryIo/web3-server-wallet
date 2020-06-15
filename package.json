@@ -1,12 +1,10 @@
 {
-  "name": "web3-server-wallet",
+  "name": "@nodefactory/web3-server-wallet",
   "version": "0.1.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "module": "lib/index.js",
   "files": [
     "dist",
-    "lib",
     "src"
   ],
   "repository": "git@github.com:nodefactory/web3-server-wallet.git",
@@ -18,17 +16,15 @@
     "server-wallet"
   ],
   "scripts": {
-    "prebuild": "rm -rf lib && rm -rf dist",
-    "build": "yarn run build:node && yarn run build:web && yarn run build:types",
+    "prebuild": "rm -rf dist",
+    "build": "yarn run build:node && yarn run build:types",
     "build:node": "babel --no-babelrc --config-file ./babel.config.json src --copy-files -x .ts -d dist --source-maps",
-    "build:web": "babel --no-babelrc --config-file ./babel.web.config.json src --copy-files -x .ts -d lib --source-maps",
     "build:types": "tsc --declaration --outDir dist --emitDeclarationOnly",
     "check-types": "tsc --noEmit",
     "lint": "eslint --ext .ts src/",
     "pretest": "yarn check-types",
-    "test": "yarn run test:node && yarn run test:web",
+    "test": "yarn run test:node",
     "test:node": "mocha -r ./babel-register.js \"test/**/*.test.ts\"",
-    "test:web": "karma start"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -49,21 +45,13 @@
     "bsert": "0.0.10",
     "chai": "^4.2.0",
     "eslint": "^6.6.0",
-    "karma": "^4.4.1",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-cli": "^2.0.0",
-    "karma-mocha": "^1.3.0",
-    "karma-spec-reporter": "^0.0.32",
-    "karma-webpack": "^4.0.2",
     "mocha": "^6.2.3",
     "sinon": "^9.0.2",
     "ts-loader": "^6.2.1",
     "typescript": "^3.6.4",
-    "webpack": "^4.41.5"
   },
   "dependencies": {
-    "axios": "^0.19.2",
-    "ethers": "^4.0.47"
+    "axios": ">=0.19.2",
+    "ethers": ">=4.0.47"
   }
 }

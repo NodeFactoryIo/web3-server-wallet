@@ -22,7 +22,7 @@ wallet.sendTransaction(transactionRequest);
 Monitor service will automatically check if sent transaction is dropped and resubmit it with
 higher gas price and track its progress.
 
-This package requires for IWalletStorage interface to be implemented to store sent transactions.
+This package requires for [IWalletTransactionStorage](src/@types/wallet.ts) interface to be implemented to store sent transactions.
 
 ## License
 
