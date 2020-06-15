@@ -72,7 +72,6 @@ describe("Transaction monitor service", function () {
     }
     const spy = sinon.spy(txMonitorService as any, "transactionIsOld");
 
-
     txMonitorService.start(20);
 
     setTimeout(() => {
@@ -91,7 +90,6 @@ describe("Transaction monitor service", function () {
     }
     sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(12.0))
     const stub = web3WalletStub.sendTransaction.resolves()
-
 
     txMonitorService.start(20);
 
@@ -112,7 +110,6 @@ describe("Transaction monitor service", function () {
     sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(12.0))
     const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
     const loopSpy = sinon.spy(txMonitorService as any, "transactionIsOld");
-
 
     txMonitorService.start(20);
 
