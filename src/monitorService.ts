@@ -46,7 +46,7 @@ export class TxMonitorService {
   }
 
   private transactionIsConfirmed(transaction: SavedTransactionResponse): boolean {
-    if(transaction.blockNumber) {
+    if(transaction.blockNumber && transaction.confirmations > 4) {
       return true;
     }
 

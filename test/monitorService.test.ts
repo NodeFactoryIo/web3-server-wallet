@@ -63,7 +63,7 @@ describe("Transaction monitor service", function () {
     walletStorage.getTransactions = async function getTransactions() {
       return [
         {submitTime: new Date().getTime()} as SavedTransactionResponse,
-        {blockNumber: 13, submitTime: new Date().getTime()} as SavedTransactionResponse,
+        {blockNumber: 13, confirmations: 6, submitTime: new Date().getTime()} as SavedTransactionResponse,
       ];
     }
     const spy = sinon.spy(txMonitorService as any, "transactionIsOld");
