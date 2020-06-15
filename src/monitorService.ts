@@ -1,14 +1,18 @@
 import {ServerWeb3Wallet} from "./serverWallet";
-import {TransactionResponse} from "ethers/providers";
+import {SavedTransactionResponse} from "./@types/wallet";
 import {BigNumber} from "ethers/utils";
-import { SavedTransactionResponse } from "./@types/wallet";
+
 
 export class TxMonitorService {
   private wallet: ServerWeb3Wallet;
   private intervalId?: NodeJS.Timeout;
+  private neededConfirmations: number;
+  private oldTransactionTime: number;
 
-  constructor(wallet: ServerWeb3Wallet) {
+  constructor(wallet: ServerWeb3Wallet, neededConfirmations=5, oldTransactionTime=180) {
     this.wallet = wallet;
+    this.neededConfirmations = neededConfirmations;
+    this.oldTransactionTime = oldTransactionTime;
   };
 
   public async start(interval=30000): Promise<void> {
@@ -35,6 +39,7 @@ export class TxMonitorService {
     for(const transaction of transactions) {
 
       if(this.transactionIsConfirmed(transaction)) {
+        this.wallet.walletStorage.deleteTransaction(transaction)
         continue;
       }
 
@@ -46,7 +51,7 @@ export class TxMonitorService {
   }
 
   private transactionIsConfirmed(transaction: SavedTransactionResponse): boolean {
-    if(transaction.blockNumber && transaction.confirmations > 4) {
+    if(transaction.blockNumber && transaction.confirmations > this.neededConfirmations) {
       return true;
     }
 
@@ -54,7 +59,7 @@ export class TxMonitorService {
   }
 
   private transactionIsOld(transaction: SavedTransactionResponse): boolean {
-    if(new Date().getTime() - transaction.submitTime > 180) {
+    if(new Date().getTime() - transaction.submitTime > this.oldTransactionTime) {
       return true;
     }
 
@@ -62,7 +67,11 @@ export class TxMonitorService {
   }
 
   private transactionIsDropped(transaction: SavedTransactionResponse): boolean {
-    return false;
+    if(transaction.hash && !this.wallet.provider.getTransactionReceipt(transaction.hash)) {
+      return true
+    }
+
+    return false
   }
 
   private async resendTransaction(transaction: SavedTransactionResponse): Promise<void> {
