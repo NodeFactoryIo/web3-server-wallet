@@ -18,12 +18,12 @@ describe("Estimate gas price", function () {
 
   it("Looks for gas price on eth gas station by default", async function() {
     sinon.stub(axios, "get").resolves(
-      {data: {safeLow: 100.0}, status: 200}
+      {data: {safeLow: 10}, status: 200}
     )
 
     const gasPrice = await estimateGasPrice("safeLow");
 
-    expect(gasPrice.toNumber()).to.be.deep.equal(10.0);
+    expect(gasPrice.toNumber()).to.be.deep.equal(100000000000);
   });
 
   it("Returns undefined if gas station fails", async function() {

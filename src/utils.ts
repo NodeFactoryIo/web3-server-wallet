@@ -8,7 +8,7 @@ export async function estimateGasPrice(
 ): Promise<BigNumber | undefined> {
   try {
     const response = await axios.get(GAS_PRICE_API)
-    return new BigNumber(response.data[gasPriceOption] / 10);
+    return new BigNumber(response.data[gasPriceOption] * Math.pow(10,10));
   } catch {
     return;
   }
