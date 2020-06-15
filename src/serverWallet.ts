@@ -1,16 +1,16 @@
 import axios from "axios";
 import {Wallet} from "ethers";
 import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
-import {IWalletStorage} from "./@types/wallet"
+import {IWalletTransactionStorage} from "./@types/wallet"
 import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
 
 const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
 
 export class ServerWeb3Wallet extends Wallet {
 
-  public walletStorage: IWalletStorage;
+  public walletStorage: IWalletTransactionStorage;
 
-  constructor(key: SigningKey, walletStorage: IWalletStorage, provider?: Provider) {
+  constructor(key: SigningKey, walletStorage: IWalletTransactionStorage, provider?: Provider) {
     super(key, provider);
     this.walletStorage = walletStorage;
   };
@@ -37,12 +37,11 @@ export class ServerWeb3Wallet extends Wallet {
 
   private async getNonce(): Promise<BigNumber> {
     const transactions = await this.walletStorage.getTransactions();
-    const transactionCount = await this.getTransactionCount("pending");
-
-    if(transactions[transactions.length - 1].nonce + 1 !== transactionCount) {
-      return new BigNumber(transactions[transactions.length - 1].nonce);
+    if(transactions.length) {
+      return new BigNumber(transactions[transactions.length - 1].nonce + 1);
     }
 
+    const transactionCount = await this.getTransactionCount();
     return new BigNumber(transactionCount);
   }
 

@@ -5,12 +5,9 @@ export interface IWalletSource {
   assignWallet(): Promise<SigningKey>;
 }
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface SavedTransactionResponse extends TransactionResponse {
-  submitTime: number;
-}
+export type SavedTransactionResponse = TransactionResponse & {submitTime: number}
 
-export interface IWalletStorage {
+export interface IWalletTransactionStorage {
   publicKey: string;
 
   getTransactions(): Promise<SavedTransactionResponse[]>;
