@@ -5,6 +5,7 @@ import {TransactionResponse} from "ethers/providers";
 import {TxMonitorService} from "../src/monitorService";
 import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {BigNumber} from "ethers/utils";
+import * as utils from "../src/utils";
 
 describe("Transaction monitor service", function () {
 
@@ -88,6 +89,7 @@ describe("Transaction monitor service", function () {
         {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
       ];
     }
+    sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(12.0))
     const stub = web3WalletStub.sendTransaction.resolves()
 
 
@@ -107,6 +109,7 @@ describe("Transaction monitor service", function () {
         {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
       ];
     }
+    sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(12.0))
     const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
     const loopSpy = sinon.spy(txMonitorService as any, "transactionIsOld");
 
@@ -116,6 +119,45 @@ describe("Transaction monitor service", function () {
     setTimeout(() => {
       expect(sendTransactionStub.callCount).to.be.deep.equal(1);
       expect(loopSpy.callCount).to.be.deep.equal(2);
+      done();
+    }, 30)
+
+  });
+
+  it("Check transaction recalculates gas price from eth gas station", function (done) {
+    walletStorage.getTransactions = async function getTransactions() {
+      return [
+        {nonce: 2, gasPrice: new BigNumber(10), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
+      ];
+    }
+    sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(12.0))
+    const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
+
+    txMonitorService.start(20);
+
+    setTimeout(() => {
+      expect(sendTransactionStub.args[0][0].gasPrice.toNumber()).to.be.deep.equal(12.0);
+      done();
+    }, 30)
+
+  });
+
+  it(
+    "Check transaction recalculates gas price as 20% higher than original if gas station price cheaper",
+    function (done)
+  {
+    walletStorage.getTransactions = async function getTransactions() {
+      return [
+        {nonce: 2, gasPrice: new BigNumber(20), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
+      ];
+    }
+    sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(12.0))
+    const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
+
+    txMonitorService.start(20);
+
+    setTimeout(() => {
+      expect(sendTransactionStub.args[0][0].gasPrice.toNumber()).to.be.deep.equal(24.0);
       done();
     }, 30)
 

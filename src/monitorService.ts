@@ -1,6 +1,7 @@
 import {ServerWeb3Wallet} from "./serverWallet";
 import {SavedTransactionResponse} from "./@types/wallet";
 import {BigNumber} from "ethers/utils";
+import {estimateGasPrice} from "./utils";
 
 
 export class TxMonitorService {
@@ -76,8 +77,26 @@ export class TxMonitorService {
 
   private async resendTransaction(transaction: SavedTransactionResponse): Promise<void> {
     await this.wallet.walletStorage.deleteTransaction(transaction);
-    transaction.gasPrice = new BigNumber(transaction.gasPrice.toNumber() * 1.5);
-    await this.wallet.sendTransaction(transaction)
+    const newGasPrice = await this.recalculateGasPrice(transaction.gasPrice)
+    await this.wallet.sendTransaction({
+      gasPrice: newGasPrice,
+      to: transaction.to,
+      from: transaction.from,
+      nonce: transaction.nonce,
+      gasLimit: transaction.gasLimit,
+      data: transaction.data,
+      value: transaction.value,
+      chainId: transaction.chainId
+    });
+  }
+
+  private async recalculateGasPrice(gasPrice: BigNumber): Promise<BigNumber> {
+    const estimatedGasPrice = await estimateGasPrice("fastest");
+    if(estimatedGasPrice && gasPrice < estimatedGasPrice) {
+      return estimatedGasPrice;
+    }
+
+    return new BigNumber(Math.round(gasPrice.toNumber() * 1.2));
   }
 
 }
