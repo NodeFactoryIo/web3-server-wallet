@@ -145,7 +145,7 @@ describe("Server wallet sendTransaction", function () {
     expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(3);
   });
 
-  it("Transaction response stored into wallet storage", async function () {
+  it("Transaction response stored into wallet storage if hash exists", async function () {
     const spy = sinon.spy(walletStorage, "saveTransaction");
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"

@@ -24,7 +24,9 @@ export class ServerWeb3Wallet extends Wallet {
     }
 
     const txResponse = await this.getTransactionResponse(tx);
-    await this.walletStorage.saveTransaction(txResponse);
+    if(txResponse.hash) {
+      await this.walletStorage.saveTransaction(txResponse);
+    }
     return txResponse;
   }
 
