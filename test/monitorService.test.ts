@@ -3,18 +3,21 @@ import sinon, {SinonStubbedInstance} from "sinon";
 import {ServerWeb3Wallet} from "../src/serverWallet";
 import {TransactionResponse} from "ethers/providers";
 import {TxMonitorService} from "../src/monitorService";
-import {IWalletStorage, SavedTransactionResponse} from "../src/@types/wallet";
+import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {BigNumber} from "ethers/utils";
 
 describe("Transaction monitor service", function () {
 
   let web3WalletStub: SinonStubbedInstance<ServerWeb3Wallet>;
   let txMonitorService: TxMonitorService;
-  let walletStorage: IWalletStorage;
+  let walletStorage: IWalletTransactionStorage;
 
   beforeEach(function () {
     web3WalletStub = sinon.createStubInstance(ServerWeb3Wallet);
-    walletStorage = sinon.stub() as IWalletStorage;
+    walletStorage = sinon.stub() as IWalletTransactionStorage;
+    walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
+      return;
+    }
     web3WalletStub.walletStorage = walletStorage;
     txMonitorService = new TxMonitorService(web3WalletStub);
   });
@@ -85,9 +88,6 @@ describe("Transaction monitor service", function () {
         {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
       ];
     }
-    walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
-      return;
-    }
     const stub = web3WalletStub.sendTransaction.resolves()
 
 
@@ -106,9 +106,6 @@ describe("Transaction monitor service", function () {
         {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime()} as SavedTransactionResponse,
         {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
       ];
-    }
-    walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
-      return;
     }
     const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
     const loopSpy = sinon.spy(txMonitorService as any, "transactionIsOld");

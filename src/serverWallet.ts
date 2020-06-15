@@ -1,24 +1,39 @@
-import axios from "axios";
 import {Wallet} from "ethers";
 import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
 import {IWalletTransactionStorage} from "./@types/wallet"
 import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
-
-const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
+import {estimateGasPrice} from "./gasPrice";
 
 export class ServerWeb3Wallet extends Wallet {
+  private gasStationApiKey?: string;
 
   public walletStorage: IWalletTransactionStorage;
 
-  constructor(key: SigningKey, walletStorage: IWalletTransactionStorage, provider?: Provider) {
+  constructor(
+    key: SigningKey,
+    walletStorage: IWalletTransactionStorage,
+    provider?: Provider,
+    gasStationApiKey?: string
+  ) {
     super(key, provider);
     this.walletStorage = walletStorage;
+    this.gasStationApiKey = gasStationApiKey;
   };
 
-  public async sendTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
+  public async sendTransaction(
+    tx: TransactionRequest,
+    gasPriceOption="safeLow",
+    gasPriceLimit?: number
+  ): Promise<TransactionResponse> {
     if(tx.gasPrice == null) {
-      tx.gasPrice = await this.getSafeLowGasPrice();
+      tx.gasPrice = await estimateGasPrice(
+        this.provider,
+        gasPriceOption,
+        gasPriceLimit,
+        this.gasStationApiKey
+      )
     }
+
     if(tx.nonce == null){
       tx.nonce = await this.getNonce();
     }
@@ -28,11 +43,6 @@ export class ServerWeb3Wallet extends Wallet {
       await this.walletStorage.saveTransaction(txResponse);
     }
     return txResponse;
-  }
-
-  private async getSafeLowGasPrice(): Promise<BigNumber> {
-    const response = await axios.get(GAS_PRICE_API);
-    return new BigNumber(response.data.safeLow / 10);
   }
 
   private async getNonce(): Promise<BigNumber> {

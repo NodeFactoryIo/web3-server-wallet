@@ -3,14 +3,15 @@ import axios from "axios";
 import sinon, {SinonStubbedInstance} from "sinon";
 import {SigningKey, BigNumber, Transaction} from "ethers/utils";
 import {ServerWeb3Wallet} from "../src/serverWallet";
-import {IWalletStorage, SavedTransactionResponse} from "../src/@types/wallet";
+import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {Provider, TransactionResponse} from "ethers/providers";
+import * as gasPriceModule from "../src/gasPrice";
 
 describe("Server wallet sendTransaction", function () {
 
   let signingKey: SigningKey;
   let web3Wallet: ServerWeb3Wallet;
-  let walletStorage: IWalletStorage;
+  let walletStorage: IWalletTransactionStorage;
   let providerStub: SinonStubbedInstance<Provider>;
 
   beforeEach(function () {
@@ -18,7 +19,7 @@ describe("Server wallet sendTransaction", function () {
       "E5B21F1D68386B32407F2B63F49EE74CDAE4A80EE346EB90205B62D8BCDE9920"
     )
     sinon.stub(Provider, "isProvider").returns(true)
-    walletStorage = sinon.stub() as IWalletStorage;
+    walletStorage = sinon.stub() as IWalletTransactionStorage;
     providerStub = sinon.stub() as Provider;
     web3Wallet = new ServerWeb3Wallet(
       signingKey,
@@ -53,10 +54,8 @@ describe("Server wallet sendTransaction", function () {
     expect(transactionResponseStub.args[0][0].gasPrice).to.be.equal(20.00);
   });
 
-  it("Assigns safe low gas price from eth gas station if price not sent", async function () {
-    sinon.stub(axios, "get").resolves(
-        {data: {safeLow: 10.0}, status: 200}
-    );
+  it("Assigns calculated gas price estimation", async function () {
+    sinon.stub(gasPriceModule, "estimateGasPrice").resolves(new BigNumber(10.0))
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"
     ).resolves(sinon.stub() as TransactionResponse)
@@ -71,7 +70,7 @@ describe("Server wallet sendTransaction", function () {
 
     const txResponse = await web3Wallet.sendTransaction(tx);
 
-    expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(1.0);
+    expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(10.0);
   });
 
   it("Uses default nonce if sent", async function () {

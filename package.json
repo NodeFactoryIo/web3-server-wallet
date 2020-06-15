@@ -24,7 +24,7 @@
     "lint": "eslint --ext .ts src/",
     "pretest": "yarn check-types",
     "test": "yarn run test:node",
-    "test:node": "mocha -r ./babel-register.js \"test/**/*.test.ts\"",
+    "test:node": "mocha -r ./babel-register.js \"test/**/*.test.ts\""
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -48,7 +48,7 @@
     "mocha": "^6.2.3",
     "sinon": "^9.0.2",
     "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4",
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "axios": ">=0.19.2",
