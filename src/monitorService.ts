@@ -35,7 +35,7 @@ export class TxMonitorService {
     }
   }
 
-  private async checkTransactions(): Promise<void> {
+  protected async checkTransactions(): Promise<void> {
     const transactions = await this.wallet.walletStorage.getTransactions();
     for(const transaction of transactions) {
 
