@@ -3,7 +3,7 @@ import axios from "axios";
 import sinon, {SinonStubbedInstance} from "sinon";
 import {SigningKey, BigNumber, Transaction} from "ethers/utils";
 import {ServerWeb3Wallet} from "../src/serverWallet";
-import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
+import {IWalletTransactionStorage, SavedTransactionResponse, IWalletSourceStorage} from "../src/@types/wallet";
 import {Provider, TransactionResponse} from "ethers/providers";
 import * as utils from "../src/utils";
 
@@ -12,17 +12,25 @@ describe("Server wallet sendTransaction", function () {
   let signingKey: SigningKey;
   let web3Wallet: ServerWeb3Wallet;
   let walletStorage: IWalletTransactionStorage;
+  let walletSource: IWalletSourceStorage;
   let providerStub: SinonStubbedInstance<Provider>;
 
-  beforeEach(function () {
+  beforeEach(async function () {
+    sinon.stub(Provider, "isProvider").returns(true)
+    walletStorage = sinon.stub() as IWalletTransactionStorage;
+    walletSource = sinon.stub() as IWalletSourceStorage;
+    providerStub = sinon.stub() as Provider;
     signingKey = new SigningKey(
       "E5B21F1D68386B32407F2B63F49EE74CDAE4A80EE346EB90205B62D8BCDE9920"
     )
-    sinon.stub(Provider, "isProvider").returns(true)
-    walletStorage = sinon.stub() as IWalletTransactionStorage;
-    providerStub = sinon.stub() as Provider;
-    web3Wallet = new ServerWeb3Wallet(
-      signingKey,
+    walletSource.getWallets = async () => {
+      return [signingKey];
+    }
+    walletSource.assignWallet = async () => {
+      return true;
+    }
+    web3Wallet = await ServerWeb3Wallet.create(
+      walletSource,
       walletStorage,
       providerStub
     )
@@ -33,6 +41,54 @@ describe("Server wallet sendTransaction", function () {
 
   afterEach(function () {
     sinon.restore();
+  });
+
+  it("Create without wallets returns undefined", async function () {
+    walletSource.getWallets = async () => {
+      return [];
+    }
+
+    web3Wallet = await ServerWeb3Wallet.create(
+      walletSource,
+      walletStorage,
+      providerStub
+    )
+
+    expect(web3Wallet).to.be.deep.equal(undefined);
+  });
+
+  it("Create skips wallet if assigned returns false", async function () {
+    walletSource.getWallets = async () => {
+      return [signingKey];
+    }
+    walletSource.assignWallet = async () => {
+      return false;
+    }
+
+    web3Wallet = await ServerWeb3Wallet.create(
+      walletSource,
+      walletStorage,
+      providerStub
+    )
+
+    expect(web3Wallet).to.be.deep.equal(undefined);
+  });
+
+  it("Creates wallet if available and not assigned", async function () {
+    walletSource.getWallets = async () => {
+      return [signingKey];
+    }
+    walletSource.assignWallet = async () => {
+      return true;
+    }
+
+    web3Wallet = await ServerWeb3Wallet.create(
+      walletSource,
+      walletStorage,
+      providerStub
+    )
+
+    expect(web3Wallet.walletStorage).to.be.deep.equal(walletStorage);
   });
 
   it("Uses provided gas price if sent", async function () {
@@ -46,7 +102,6 @@ describe("Server wallet sendTransaction", function () {
       gasPrice: 20.00,
       data: "data",
       value: 121,
-      chainId: 1
     }
 
     const txResponse = await web3Wallet.sendTransaction(tx);

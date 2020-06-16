@@ -1,15 +1,15 @@
 import {Wallet} from "ethers";
 import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
-import {IWalletTransactionStorage} from "./@types/wallet"
+import {IWalletTransactionStorage, IWalletSourceStorage} from "./@types/wallet"
 import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
 import {estimateGasPrice} from "./utils";
 
 export class ServerWeb3Wallet extends Wallet {
-  private gasPriceLimit: number;
-
   public walletStorage: IWalletTransactionStorage;
 
-  constructor(
+  private gasPriceLimit: number;
+
+  protected constructor(
     key: SigningKey,
     walletStorage: IWalletTransactionStorage,
     provider?: Provider,
@@ -19,6 +19,31 @@ export class ServerWeb3Wallet extends Wallet {
     this.walletStorage = walletStorage;
     this.gasPriceLimit = gasPriceLimit;
   };
+
+  public static async create(
+    walletSourceStorage: IWalletSourceStorage,
+    walletTransactionStorage: IWalletTransactionStorage,
+    provider?: Provider,
+    gasPriceLimit?
+  ): Promise<ServerWeb3Wallet | undefined> {
+    const wallets = await walletSourceStorage.getWallets()
+    let assignedWallet: SigningKey | undefined;
+    for (const wallet of wallets) {
+      if(await walletSourceStorage.assignWallet(wallet.publicKey)) {
+        assignedWallet = wallet;
+        break;
+      }
+    }
+
+    if(assignedWallet) {
+      return new ServerWeb3Wallet(
+        assignedWallet,
+        walletTransactionStorage,
+        provider,
+        gasPriceLimit,
+      )
+    }
+  }
 
   public async sendTransaction(
     tx: TransactionRequest,
