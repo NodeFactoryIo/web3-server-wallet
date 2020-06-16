@@ -12,7 +12,7 @@ Example of usage:
 ```typescript
 import {ServerWeb3Wallet, TxMonitorService} from "web3-server-wallet";
 
-const wallet = new ServerWeb3Wallet(signingKey, walletStorage, provider);
+const wallet = await ServerWeb3Wallet.create(walletSource, walletStorage);
 const monitorService = new TxMonitorService(wallet);
 monitorService.start()
 
@@ -22,7 +22,7 @@ wallet.sendTransaction(transactionRequest);
 Monitor service will automatically check if sent transaction is dropped and resubmit it with
 higher gas price and track its progress.
 
-This package requires for [IWalletTransactionStorage](src/@types/wallet.ts) interface to be implemented to store sent transactions.
+This package requires for [IWalletTransactionStorage](src/@types/wallet.ts) and [IWalletSourceStorage](src/@types/wallets.ts) interfacew to be implemented to store sent transactions and available wallets.
 
 ## License
 
