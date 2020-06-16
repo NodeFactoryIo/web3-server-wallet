@@ -65,7 +65,9 @@ export class ServerWeb3Wallet extends Wallet {
   }
 
   private async getNonce(): Promise<BigNumber> {
-    const transactions = await this.walletStorage.getTransactions();
+    const transactions = await this.walletStorage.getTransactions(
+      await this.getAddress()
+    );
     if(transactions.length) {
       return new BigNumber(transactions[transactions.length - 1].nonce + 1);
     }

@@ -23,11 +23,8 @@ describe("Server wallet sendTransaction", function () {
     signingKey = new SigningKey(
       "E5B21F1D68386B32407F2B63F49EE74CDAE4A80EE346EB90205B62D8BCDE9920"
     )
-    walletSource.getWallets = async () => {
-      return [signingKey];
-    }
     walletSource.assignWallet = async () => {
-      return true;
+      return signingKey;
     }
     web3Wallet = await ServerWeb3Wallet.create(
       walletSource,
