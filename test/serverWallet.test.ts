@@ -43,9 +43,9 @@ describe("Server wallet sendTransaction", function () {
     sinon.restore();
   });
 
-  it("Create without wallets returns undefined", async function () {
-    walletSource.getWallets = async () => {
-      return [];
+  it("Create returns undefined if no wallets available", async function () {
+    walletSource.assignWallet = async () => {
+      return undefined;
     }
 
     web3Wallet = await ServerWeb3Wallet.create(
@@ -57,29 +57,9 @@ describe("Server wallet sendTransaction", function () {
     expect(web3Wallet).to.be.deep.equal(undefined);
   });
 
-  it("Create skips wallet if assigned returns false", async function () {
-    walletSource.getWallets = async () => {
-      return [signingKey];
-    }
+  it("Create creates wallet if available", async function () {
     walletSource.assignWallet = async () => {
-      return false;
-    }
-
-    web3Wallet = await ServerWeb3Wallet.create(
-      walletSource,
-      walletStorage,
-      providerStub
-    )
-
-    expect(web3Wallet).to.be.deep.equal(undefined);
-  });
-
-  it("Creates wallet if available and not assigned", async function () {
-    walletSource.getWallets = async () => {
-      return [signingKey];
-    }
-    walletSource.assignWallet = async () => {
-      return true;
+      return signingKey;
     }
 
     web3Wallet = await ServerWeb3Wallet.create(

@@ -26,14 +26,7 @@ export class ServerWeb3Wallet extends Wallet {
     provider?: Provider,
     gasPriceLimit?
   ): Promise<ServerWeb3Wallet | undefined> {
-    const wallets = await walletSourceStorage.getWallets()
-    let assignedWallet: SigningKey | undefined;
-    for (const wallet of wallets) {
-      if(await walletSourceStorage.assignWallet(wallet.publicKey)) {
-        assignedWallet = wallet;
-        break;
-      }
-    }
+    const assignedWallet = await walletSourceStorage.assignWallet();
 
     if(assignedWallet) {
       return new ServerWeb3Wallet(

@@ -5,27 +5,20 @@ export type SavedTransactionResponse = TransactionResponse & {submitTime: number
 
 export interface IWalletSourceStorage {
   /**
-   * Returns available wallets (wallets that are not assigned).
+   * Assigns wallet and removes it from available pool of wallets.
    */
-  getWallets(): Promise<SigningKey[]>;
+  assignWallet(): Promise<SigningKey | undefined>;
   /**
-   * Assigns wallet and removes it from "getWallets" pool of wallets.
-   * Returns false if wallet taken.
-   */
-  assignWallet(publicKey: string): Promise<boolean>;
-  /**
-   * Releases assigned wallet and returns it to "getWallets" pool of wallets.
+   * Releases assigned wallet and returns it to pool of available wallets.
    */
   releaseWallet(publicKey: string): Promise<void>;
 }
 
 export interface IWalletTransactionStorage {
-  publicKey: string;
-
   /**
-   * Returns transactions from storage sorted by nonce ASC.
+   * Returns transactions from storage filtered by address and sorted by nonce ASC.
    */
-  getTransactions(): Promise<SavedTransactionResponse[]>;
+  getTransactions(address: string): Promise<SavedTransactionResponse[]>;
   /**
    * Saves transaction to storage with submit time.
    */
