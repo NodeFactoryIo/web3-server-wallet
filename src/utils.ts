@@ -1,5 +1,5 @@
 import axios from "axios";
-import {BigNumber, parseUnits, formatUnits} from "ethers/utils";
+import {BigNumber, parseUnits} from "ethers/utils";
 import {SavedTransactionResponse} from "./@types/wallet";
 import {Provider} from "ethers/providers";
 

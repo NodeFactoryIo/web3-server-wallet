@@ -2,7 +2,6 @@ import {ServerWeb3Wallet} from "./serverWallet";
 import {SavedTransactionResponse} from "./@types/wallet";
 import {transactionIsConfirmed, transactionIsOld, transactionIsDropped, recalculateGasPrice} from "./utils";
 
-
 export class TxMonitorService {
   private wallet: ServerWeb3Wallet;
   private intervalId?: NodeJS.Timeout;
