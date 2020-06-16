@@ -84,12 +84,12 @@ describe("Server wallet sendTransaction", function () {
       data: "data",
       value: 121,
       chainId: 1,
-      gasPrice: 60.0
+      gasPrice: 51000000000
     }
 
     const txResponse = await web3Wallet.sendTransaction(tx);
 
-    expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(50.0);
+    expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(50000000000);
   });
 
   it("Uses default nonce if sent", async function () {

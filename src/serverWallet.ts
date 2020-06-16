@@ -13,7 +13,7 @@ export class ServerWeb3Wallet extends Wallet {
     key: SigningKey,
     walletStorage: IWalletTransactionStorage,
     provider?: Provider,
-    gasPriceLimit=50
+    gasPriceLimit=50000000000
   ) {
     super(key, provider);
     this.walletStorage = walletStorage;
