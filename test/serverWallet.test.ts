@@ -143,12 +143,68 @@ describe("Server wallet sendTransaction", function () {
     expect(transactionResponseStub.args[0][0].nonce).to.be.equal(6);
   });
 
+  it("Uses gap nonce if it exists", async function () {
+    walletStorage.getTransactions = async function getTransactions(){
+      return [
+        {nonce: 2} as unknown as SavedTransactionResponse,
+        {nonce: 4} as unknown as SavedTransactionResponse
+      ]
+    }
+    sinon.stub(web3Wallet, "getTransactionCount").resolves(
+      2
+    );
+    const transactionResponseStub = sinon.stub(
+      web3Wallet as any, "getTransactionResponse"
+    ).resolves(sinon.stub() as TransactionResponse)
+    const tx = {
+      to: "to-address",
+      gasLimit: 21000,
+      gasPrice: 10.00,
+      data: "data",
+      value: 121,
+      chainId: 1
+    }
+
+    const txResponse = await web3Wallet.sendTransaction(tx);
+
+    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(3);
+  });
+
+  it("Uses gap between first transaction and transaction count if it exists", async function () {
+    walletStorage.getTransactions = async function getTransactions(){
+      return [
+        {nonce: 3} as unknown as SavedTransactionResponse,
+      ]
+    }
+    sinon.stub(web3Wallet, "getTransactionCount").resolves(
+      2
+    );
+    const transactionResponseStub = sinon.stub(
+      web3Wallet as any, "getTransactionResponse"
+    ).resolves(sinon.stub() as TransactionResponse)
+    const tx = {
+      to: "to-address",
+      gasLimit: 21000,
+      gasPrice: 10.00,
+      data: "data",
+      value: 121,
+      chainId: 1
+    }
+
+    const txResponse = await web3Wallet.sendTransaction(tx);
+
+    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(2);
+  });
+
   it("Assigns highest nonce + 1 if transactions exist", async function () {
     walletStorage.getTransactions = async function getTransactions(){
       return [
         {nonce: 2} as unknown as SavedTransactionResponse
       ]
     }
+    sinon.stub(web3Wallet, "getTransactionCount").resolves(
+      2
+    );
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "getTransactionResponse"
     ).resolves(sinon.stub() as TransactionResponse)

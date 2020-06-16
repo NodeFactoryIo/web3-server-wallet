@@ -1,6 +1,6 @@
 import {Wallet} from "ethers";
 import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
-import {IWalletTransactionStorage, IWalletSourceStorage} from "./@types/wallet"
+import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet"
 import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
 import {estimateGasPrice} from "./utils";
 
@@ -68,12 +68,35 @@ export class ServerWeb3Wallet extends Wallet {
     const transactions = await this.walletStorage.getTransactions(
       await this.getAddress()
     );
+    const transactionCount = await this.getTransactionCount();
+
+    const gapNonce = this.findGapNonce(transactions, transactionCount);
+    if(gapNonce) {
+      return new BigNumber(gapNonce)
+    }
+
     if(transactions.length) {
       return new BigNumber(transactions[transactions.length - 1].nonce + 1);
     }
 
-    const transactionCount = await this.getTransactionCount();
     return new BigNumber(transactionCount);
+  }
+
+  private findGapNonce(
+    transactions: SavedTransactionResponse[],
+    transactionCount: number
+  ): number | undefined {
+    if(transactions[0] && transactions[0].nonce - transactionCount > 0) {
+      return transactionCount;
+    }
+
+    for(let i=0; i < transactions.length - 1; i++) {
+      if(transactions[i+1].nonce - (transactions[i].nonce + 1) > 0) {
+        return transactions[i].nonce + 1;
+      }
+    }
+
+    return;
   }
 
   private async getTransactionResponse(tx: TransactionRequest): Promise<TransactionResponse> {
