@@ -30,8 +30,11 @@ export function transactionIsConfirmed(transaction: SavedTransactionResponse, ne
   return false;
 }
 
-export function transactionIsOld(transaction: SavedTransactionResponse, oldTransactionTime: number): boolean {
-  if(new Date().getTime() - transaction.submitTime > oldTransactionTime) {
+export function transactionIsOld(
+  transaction: SavedTransactionResponse,
+  transactionTimeout: number
+): boolean {
+  if(new Date().getTime() - transaction.submitTime > transactionTimeout) {
     return true;
   }
 
@@ -39,17 +42,18 @@ export function transactionIsOld(transaction: SavedTransactionResponse, oldTrans
 }
 
 export async function transactionIsDropped(transaction: SavedTransactionResponse, provider: Provider): Promise<boolean> {
-  if(transaction.hash) {
-    const transactionReceipt = await provider.getTransactionReceipt(transaction.hash);
-    if(transactionReceipt) {
-      return true;
-    }
+  const transactionReceipt = await provider.getTransactionReceipt(transaction.hash);
+  if(transactionReceipt) {
+    return false;
   }
 
-  return false;
+  return true;
 }
 
-export async function recalculateGasPrice(gasPrice: BigNumber, gasPriceIncrease: number): Promise<BigNumber> {
+export async function recalculateGasPrice(
+  gasPrice: BigNumber,
+  gasPriceIncrease: number,
+): Promise<BigNumber> {
   const estimatedGasPrice = await estimateGasPrice("fastest");
   if(estimatedGasPrice && gasPrice < estimatedGasPrice) {
     return estimatedGasPrice;

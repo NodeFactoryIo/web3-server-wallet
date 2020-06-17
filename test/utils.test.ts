@@ -110,7 +110,7 @@ describe("Transaction is dropped", function () {
     sinon.restore();
   });
 
-  it("Returns true if transaction has hash and returns transaction receipt", async function() {
+  it("Returns false if transaction has transaction receipt", async function() {
     const transaction = sinon.stub() as SavedTransactionResponse;
     transaction.hash = "test-hash"
     providerStub.getTransactionReceipt = async () => {
@@ -119,9 +119,9 @@ describe("Transaction is dropped", function () {
 
     const isDropped = await transactionIsDropped(transaction, providerStub);
 
-    expect(isDropped).to.be.deep.equal(true);
+    expect(isDropped).to.be.deep.equal(false);
   });
-  it("Returns false if transaction receipt is null", async function() {
+  it("Returns true if transaction receipt is null", async function() {
     const transaction = sinon.stub() as SavedTransactionResponse;
     transaction.hash = "test-hash"
     providerStub.getTransactionReceipt = async () => {
@@ -130,7 +130,7 @@ describe("Transaction is dropped", function () {
 
     const isDropped = await transactionIsDropped(transaction, providerStub);
 
-    expect(isDropped).to.be.deep.equal(false);
+    expect(isDropped).to.be.deep.equal(true);
   });
 
 });
