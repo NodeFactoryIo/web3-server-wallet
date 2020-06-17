@@ -23,7 +23,7 @@ export class ServerWeb3Wallet extends Wallet {
     walletSourceStorage: IWalletSourceStorage,
     walletTransactionStorage: IWalletTransactionStorage,
     provider?: Provider,
-    gasPriceLimit?
+    gasPriceLimit?: number
   ): Promise<ServerWeb3Wallet | undefined> {
     const assignedWallet = await walletSourceStorage.assignWallet();
 
