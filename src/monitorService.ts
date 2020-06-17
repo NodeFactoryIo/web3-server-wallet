@@ -50,13 +50,13 @@ export class TxMonitorService {
     for(const transaction of transactions) {
 
       if(transactionIsConfirmed(transaction, this.options.neededConfirmations)) {
-        this.wallet.walletStorage.deleteTransaction(transaction.hash)
+        await this.wallet.walletStorage.deleteTransaction(transaction.hash)
         continue;
       }
 
       if(
         transactionIsOld(transaction, this.options.transactionTimeout) ||
-        transactionIsDropped(transaction, this.wallet.provider)
+        await transactionIsDropped(transaction, this.wallet.provider)
       ) {
         await this.resendTransaction(transaction);
         break;
