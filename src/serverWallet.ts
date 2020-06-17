@@ -6,8 +6,7 @@ import {estimateGasPrice} from "./utils";
 
 export class ServerWeb3Wallet extends Wallet {
   public walletStorage: IWalletTransactionStorage;
-
-  private gasPriceLimit: number;
+  public gasPriceLimit: number;
 
   protected constructor(
     key: SigningKey,
@@ -84,10 +83,10 @@ export class ServerWeb3Wallet extends Wallet {
 
   private findGapNonce(
     transactions: SavedTransactionResponse[],
-    transactionCount: number
+    lastNonce: number
   ): number | undefined {
-    if(transactions[0] && transactions[0].nonce - transactionCount > 0) {
-      return transactionCount;
+    if(transactions[0] && transactions[0].nonce - lastNonce > 0) {
+      return lastNonce;
     }
 
     for(let i=0; i < transactions.length - 1; i++) {

@@ -26,14 +26,14 @@ describe("Server wallet sendTransaction", function () {
     walletSource.assignWallet = async () => {
       return signingKey;
     }
+    walletStorage.saveTransaction = async function saveTransaction(txResponse: TransactionResponse){
+      return;
+    }
     web3Wallet = await ServerWeb3Wallet.create(
       walletSource,
       walletStorage,
       providerStub
     )
-    walletStorage.saveTransaction = async function saveTransaction(txResponse: TransactionResponse){
-      return;
-    }
   });
 
   afterEach(function () {

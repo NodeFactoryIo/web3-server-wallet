@@ -1,7 +1,6 @@
 import {expect} from "chai";
 import sinon, {SinonStubbedInstance} from "sinon";
 import {ServerWeb3Wallet} from "../src/serverWallet";
-import {TransactionResponse} from "ethers/providers";
 import {TxMonitorService} from "../src/monitorService";
 import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {BigNumber} from "ethers/utils";
@@ -16,10 +15,11 @@ describe("Transaction monitor service", function () {
   beforeEach(function () {
     web3WalletStub = sinon.createStubInstance(ServerWeb3Wallet);
     walletStorage = sinon.stub() as IWalletTransactionStorage;
-    walletStorage.deleteTransaction = async function deleteTransaction(tx: TransactionResponse) {
+    walletStorage.deleteTransaction = async function deleteTransaction(hash: string) {
       return;
     }
     web3WalletStub.walletStorage = walletStorage;
+    sinon.stub(utils, "transactionIsDropped").resolves(false);
     txMonitorService = new TxMonitorService(web3WalletStub);
   });
 

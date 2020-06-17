@@ -2,18 +2,26 @@ import {ServerWeb3Wallet} from "./serverWallet";
 import {SavedTransactionResponse} from "./@types/wallet";
 import {transactionIsConfirmed, transactionIsOld, transactionIsDropped, recalculateGasPrice} from "./utils";
 
+interface ITxMonitorOptions {
+  neededConfirmations: number;
+  // number to time original gasPrice when resending it
+  gasPriceIncrease: number;
+  transactionTimeout: number;
+}
+
 export class TxMonitorService {
   private wallet: ServerWeb3Wallet;
   private intervalId?: NodeJS.Timeout;
-  private neededConfirmations: number;
-  private oldTransactionTime: number;
-  private gasPriceIncrease: number;
+  private options: ITxMonitorOptions;
+  private defaultOptions = {
+    neededConfirmations: 5,
+    gasPriceIncrease: 1.2,
+    transactionTimeout: 180
+  }
 
-  constructor(wallet: ServerWeb3Wallet, neededConfirmations=5, oldTransactionTime=180, gasPriceIncrease=1.2) {
+  constructor(wallet: ServerWeb3Wallet, options?: Partial<ITxMonitorOptions>) {
     this.wallet = wallet;
-    this.neededConfirmations = neededConfirmations;
-    this.oldTransactionTime = oldTransactionTime;
-    this.gasPriceIncrease = gasPriceIncrease;
+    this.options = Object.assign({}, this.defaultOptions, options)
   };
 
   public async start(interval=30000): Promise<void> {
@@ -41,13 +49,13 @@ export class TxMonitorService {
     );
     for(const transaction of transactions) {
 
-      if(transactionIsConfirmed(transaction, this.neededConfirmations)) {
-        this.wallet.walletStorage.deleteTransaction(transaction)
+      if(transactionIsConfirmed(transaction, this.options.neededConfirmations)) {
+        this.wallet.walletStorage.deleteTransaction(transaction.hash)
         continue;
       }
 
       if(
-        transactionIsOld(transaction, this.oldTransactionTime) ||
+        transactionIsOld(transaction, this.options.transactionTimeout) ||
         transactionIsDropped(transaction, this.wallet.provider)
       ) {
         await this.resendTransaction(transaction);
@@ -57,14 +65,19 @@ export class TxMonitorService {
   }
 
   private async resendTransaction(transaction: SavedTransactionResponse): Promise<void> {
-    await this.wallet.walletStorage.deleteTransaction(transaction);
-    const newGasPrice = await recalculateGasPrice(transaction.gasPrice, this.gasPriceIncrease);
+    await this.wallet.walletStorage.deleteTransaction(transaction.hash);
+    const newGasPrice = await recalculateGasPrice(
+      transaction.gasPrice,
+      this.options.gasPriceIncrease
+    );
     try {
       await this.wallet.sendTransaction({
         ...transaction,
         gasPrice: newGasPrice
       });
-    } catch {}
+    } catch {
+      console.error(`Resending transaction with hash ${transaction.hash} failed.`)
+    }
   }
 
 
