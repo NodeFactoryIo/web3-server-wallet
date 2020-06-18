@@ -6,10 +6,10 @@ import {
   estimateGasPrice,
   transactionIsConfirmed,
   transactionIsOld,
-  transactionIsDropped,
-  recalculateGasPrice
+  recalculateGasPrice,
+  transactionNotInBlock
 } from "../src/utils";
-import {Provider} from "ethers/providers";
+import {Provider, TransactionResponse} from "ethers/providers";
 import {SavedTransactionResponse} from "../src/@types/wallet";
 
 describe("Estimate gas price", function () {
@@ -99,38 +99,23 @@ describe("Transaction is old", function () {
 
 });
 
-describe("Transaction is dropped", function () {
-  let providerStub: SinonStubbedInstance<Provider>;
+describe("Transaction not in block", function () {
 
-  beforeEach(function () {
-    providerStub = sinon.stub() as Provider;
+  it("Returns false if transaction has block number", async function() {
+    const transaction = sinon.stub() as TransactionResponse;
+    transaction.blockNumber = 1;
+
+    const isInBlock = transactionNotInBlock(transaction);
+
+    expect(isInBlock).to.be.deep.equal(false);
   });
 
-  afterEach(function () {
-    sinon.restore();
-  });
+  it("Returns true if transaction not in block", function() {
+    const transaction = sinon.stub() as TransactionResponse;
 
-  it("Returns false if transaction has transaction receipt", async function() {
-    const transaction = sinon.stub() as SavedTransactionResponse;
-    transaction.hash = "test-hash"
-    providerStub.getTransactionReceipt = async () => {
-      return {};
-    }
+    const isInBlock = transactionNotInBlock(transaction);
 
-    const isDropped = await transactionIsDropped(transaction, providerStub);
-
-    expect(isDropped).to.be.deep.equal(false);
-  });
-  it("Returns true if transaction receipt is null", async function() {
-    const transaction = sinon.stub() as SavedTransactionResponse;
-    transaction.hash = "test-hash"
-    providerStub.getTransactionReceipt = async () => {
-      return;
-    }
-
-    const isDropped = await transactionIsDropped(transaction, providerStub);
-
-    expect(isDropped).to.be.deep.equal(true);
+    expect(isInBlock).to.be.deep.equal(true);
   });
 
 });

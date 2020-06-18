@@ -5,12 +5,14 @@ import {TxMonitorService} from "../src/monitorService";
 import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import {BigNumber} from "ethers/utils";
 import * as utils from "../src/utils";
+import { Provider } from "ethers/providers";
 
 describe("Transaction monitor service", function () {
 
   let web3WalletStub: SinonStubbedInstance<ServerWeb3Wallet>;
   let txMonitorService: TxMonitorService;
   let walletStorage: IWalletTransactionStorage;
+  let providerStub: Provider;
 
   beforeEach(function () {
     web3WalletStub = sinon.createStubInstance(ServerWeb3Wallet);
@@ -18,8 +20,9 @@ describe("Transaction monitor service", function () {
     walletStorage.deleteTransaction = async function deleteTransaction(hash: string) {
       return;
     }
+    providerStub = sinon.stub() as Provider;
+    web3WalletStub.provider = providerStub;
     web3WalletStub.walletStorage = walletStorage;
-    sinon.stub(utils, "transactionIsDropped").resolves(false);
     txMonitorService = new TxMonitorService(web3WalletStub);
   });
 
@@ -64,11 +67,12 @@ describe("Transaction monitor service", function () {
   });
 
   it("Check transaction ignores transactions that are confirmed", function (done) {
+    const transaction = {blockNumber: 13, confirmations: 6}
     walletStorage.getTransactions = async function getTransactions() {
-      return [
-        {blockNumber: 13, confirmations: 6, submitTime: new Date().getTime()} as SavedTransactionResponse,
-        {submitTime: new Date().getTime()} as SavedTransactionResponse,
-      ];
+      return [transaction] as SavedTransactionResponse[];
+    }
+    web3WalletStub.provider.getTransaction = async () => {
+      return transaction;
     }
     sinon.stub(utils, "recalculateGasPrice").resolves(new BigNumber(12.0))
     const spy = sinon.spy(utils, "transactionIsOld");
@@ -76,7 +80,7 @@ describe("Transaction monitor service", function () {
     txMonitorService.start(20);
 
     setTimeout(() => {
-      expect(spy.callCount).to.be.deep.equal(1);
+      expect(spy.callCount).to.be.deep.equal(0);
       done();
     }, 30)
 
@@ -85,9 +89,12 @@ describe("Transaction monitor service", function () {
   it("Check transaction ignores other transactions after resending", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
-        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
+        {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
+        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
       ];
+    }
+    web3WalletStub.provider.getTransaction = async () => {
+      return {};
     }
     sinon.stub(utils, "recalculateGasPrice").resolves(new BigNumber(12.0))
     const stub = web3WalletStub.sendTransaction.resolves()
@@ -105,8 +112,11 @@ describe("Transaction monitor service", function () {
     walletStorage.getTransactions = async function getTransactions() {
       return [
         {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime()} as SavedTransactionResponse,
-        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300} as SavedTransactionResponse,
+        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
       ];
+    }
+    web3WalletStub.provider.getTransaction = async () => {
+      return {};
     }
     sinon.stub(utils, "recalculateGasPrice").resolves(new BigNumber(12.0))
     const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
