@@ -6,6 +6,7 @@ import {
   recalculateGasPrice,
   transactionNotInBlock
 } from "./utils";
+import {logger} from "./logger";
 
 interface ITxMonitorOptions {
   neededConfirmations: number;
@@ -84,8 +85,7 @@ export class TxMonitorService {
         gasPrice: newGasPrice
       });
     } catch(error) {
-      console.error(error);
-      console.error(`Resending transaction with hash ${transaction.hash} failed.`);
+      logger(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
     }
   }
 

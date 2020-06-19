@@ -39,6 +39,7 @@
     "@babel/runtime": "^7.6.3",
     "@types/bl": "^2.1.0",
     "@types/chai": "^4.2.4",
+    "@types/debug": "^4.1.5",
     "@types/mocha": "^5.2.7",
     "@typescript-eslint/eslint-plugin": "^2.6.0",
     "@typescript-eslint/parser": "^2.6.0",
@@ -52,6 +53,7 @@
   },
   "dependencies": {
     "axios": ">=0.19.2",
+    "debug": "^4.1.1",
     "ethers": "^4.0.X"
   }
 }
