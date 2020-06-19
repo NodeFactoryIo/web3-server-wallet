@@ -1,10 +1,10 @@
-import {SigningKey} from "ethers/utils"
-import {TransactionResponse} from "ethers/providers/abstract-provider"
+import {SigningKey} from "ethers/utils";
+import {TransactionResponse} from "ethers/providers/abstract-provider";
 
 export type SavedTransactionResponse = TransactionResponse & {
   submitTime: number;
   hash: string;
-}
+};
 
 export interface IWalletSourceStorage {
   /**

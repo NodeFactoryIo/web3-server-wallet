@@ -1,6 +1,6 @@
 import {Wallet} from "ethers";
 import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
-import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet"
+import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet";
 import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
 import {estimateGasPrice} from "./utils";
 
@@ -17,7 +17,7 @@ export class ServerWeb3Wallet extends Wallet {
     super(key, provider);
     this.walletStorage = walletStorage;
     this.gasPriceLimit = gasPriceLimit;
-  };
+  }
 
   public static async create(
     walletSourceStorage: IWalletSourceStorage,
@@ -33,7 +33,7 @@ export class ServerWeb3Wallet extends Wallet {
         walletTransactionStorage,
         provider,
         gasPriceLimit,
-      )
+      );
     }
   }
 
@@ -45,7 +45,7 @@ export class ServerWeb3Wallet extends Wallet {
     if(tx.gasPrice == null) {
       tx.gasPrice = await estimateGasPrice(
         gasPriceOption,
-      )
+      );
     }
 
     if(tx.gasPrice && tx.gasPrice > this.gasPriceLimit) {
@@ -71,7 +71,7 @@ export class ServerWeb3Wallet extends Wallet {
 
     const gapNonce = this.findGapNonce(transactions, transactionCount);
     if(gapNonce) {
-      return new BigNumber(gapNonce)
+      return new BigNumber(gapNonce);
     }
 
     if(transactions.length) {
@@ -99,7 +99,7 @@ export class ServerWeb3Wallet extends Wallet {
   }
 
   private async getTransactionResponse(tx: TransactionRequest): Promise<TransactionResponse> {
-    const populatedTx = await populateTransaction(tx, this.provider, this.address)
+    const populatedTx = await populateTransaction(tx, this.provider, this.address);
     const signedTx = await this.sign(populatedTx);
     return await this.provider.sendTransaction(signedTx);
   }

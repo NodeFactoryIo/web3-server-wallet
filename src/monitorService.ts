@@ -22,11 +22,11 @@ export class TxMonitorService {
     neededConfirmations: 5,
     gasPriceIncrease: 1.2,
     transactionTimeout: 180000
-  }
+  };
 
   constructor(wallet: ServerWeb3Wallet, options?: Partial<ITxMonitorOptions>) {
     this.wallet = wallet;
-    this.options = Object.assign({}, this.defaultOptions, options)
+    this.options = Object.assign({}, this.defaultOptions, options);
   };
 
   public async start(interval=300000): Promise<void> {
@@ -37,7 +37,7 @@ export class TxMonitorService {
     this.intervalId = setInterval(
       this.checkTransactions.bind(this),
       interval
-    )
+    );
   }
 
   public async stop(): Promise<void> {
@@ -56,7 +56,7 @@ export class TxMonitorService {
       const transactionInfo = await this.wallet.provider.getTransaction(transaction.hash);
 
       if(transactionIsConfirmed(transactionInfo, this.options.neededConfirmations)) {
-        await this.wallet.walletStorage.deleteTransaction(transaction.hash)
+        await this.wallet.walletStorage.deleteTransaction(transaction.hash);
         continue;
       }
 
@@ -84,8 +84,8 @@ export class TxMonitorService {
         gasPrice: newGasPrice
       });
     } catch(error) {
-      console.error(error)
-      console.error(`Resending transaction with hash ${transaction.hash} failed.`)
+      console.error(error);
+      console.error(`Resending transaction with hash ${transaction.hash} failed.`);
     }
   }
 
