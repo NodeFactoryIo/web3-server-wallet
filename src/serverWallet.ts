@@ -3,8 +3,12 @@ import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
 import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet";
 import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
 import {estimateGasPrice} from "./utils";
+import pushable, {Pushable} from "it-pushable";
 
 export class ServerWeb3Wallet extends Wallet {
+  private transactionQueue: Pushable<TransactionRequest>;
+  private sendTransactionQueue: AsyncGenerator<TransactionResponse>;
+
   public walletStorage: IWalletTransactionStorage;
   public gasPriceLimit: number;
 
@@ -17,6 +21,8 @@ export class ServerWeb3Wallet extends Wallet {
     super(key, provider);
     this.walletStorage = walletStorage;
     this.gasPriceLimit = gasPriceLimit;
+    this.transactionQueue = pushable()
+    this.sendTransactionQueue = this.sendTransactionIterator();
   }
 
   public static async create(
@@ -52,15 +58,22 @@ export class ServerWeb3Wallet extends Wallet {
       tx.gasPrice = new BigNumber(this.gasPriceLimit);
     }
 
-    if(tx.nonce == null){
-      tx.nonce = await this.getNonce();
-    }
+    this.transactionQueue.push(tx);
+    return (await this.sendTransactionQueue.next()).value;
+  }
 
-    const txResponse = await this.getTransactionResponse(tx);
-    if(txResponse.hash) {
-      await this.walletStorage.saveTransaction(txResponse,);
+  private async *sendTransactionIterator(): AsyncGenerator<TransactionResponse> {
+    for await (const tx of this.transactionQueue) {
+      if(tx.nonce == null){
+        tx.nonce = this.getNonce();
+      }
+
+      const txResponse = await this.getTransactionResponse(tx);
+      if(txResponse.hash) {
+        await this.walletStorage.saveTransaction(txResponse);
+      }
+      yield txResponse;
     }
-    return txResponse;
   }
 
   private async getNonce(): Promise<BigNumber> {
