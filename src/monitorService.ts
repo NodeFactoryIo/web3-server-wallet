@@ -85,8 +85,7 @@ export class TxMonitorService {
         gasPrice: newGasPrice
       });
     } catch(error) {
-      logger(error);
-      logger(`Resending transaction with hash ${transaction.hash} failed.`);
+      logger(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
     }
   }
 
