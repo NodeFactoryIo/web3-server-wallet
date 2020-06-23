@@ -22,7 +22,7 @@ export class ServerWeb3Wallet extends Wallet {
     this.walletStorage = walletStorage;
     this.gasPriceLimit = gasPriceLimit;
     this.transactionQueue = pushable()
-    this.sendTransactionQueue = this.sendTransactionIterator();
+    this.sendTransactionQueue = this.sendTransactionGenerator();
   }
 
   public static async create(
@@ -62,10 +62,10 @@ export class ServerWeb3Wallet extends Wallet {
     return (await this.sendTransactionQueue.next()).value;
   }
 
-  private async *sendTransactionIterator(): AsyncGenerator<TransactionResponse> {
+  private async *sendTransactionGenerator(): AsyncGenerator<TransactionResponse> {
     for await (const tx of this.transactionQueue) {
       if(tx.nonce == null){
-        tx.nonce = this.getNonce();
+        tx.nonce = await this.getNonce();
       }
 
       const txResponse = await this.getTransactionResponse(tx);

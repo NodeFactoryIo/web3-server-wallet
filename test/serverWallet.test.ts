@@ -246,6 +246,45 @@ describe("Server wallet sendTransaction", function () {
     expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(4);
   });
 
+  it("Calculates nonce correctly if 2 transactions sent at the same time", async function () {
+    sinon.stub(web3Wallet, "getTransactionCount").resolves(
+      4
+    );
+    const transactions: SavedTransactionResponse[] = [];
+    walletStorage.getTransactions = async function getTransactions(){
+      return transactions;
+    }
+    walletStorage.saveTransaction = async function saveTransaction(tx: TransactionResponse){
+      transactions.push(tx as unknown as SavedTransactionResponse);
+    }
+    const transactionResponseStub = sinon.stub(
+      web3Wallet as any, "getTransactionResponse"
+    ).resolves({hash: "test-hash", nonce: 4} as TransactionResponse)
+
+    const tx1 = {
+      to: "to-address",
+      gasLimit: 21000,
+      gasPrice: 10.00,
+      data: "data",
+      value: 121,
+      chainId: 1
+    }
+    const tx2 = {
+      to: "to-address-2",
+      gasLimit: 21000,
+      gasPrice: 10.00,
+      data: "data-2",
+      value: 122,
+      chainId: 1
+    }
+
+    await web3Wallet.sendTransaction(tx1);
+    await web3Wallet.sendTransaction(tx2);
+
+    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(4);
+    expect(transactionResponseStub.args[1][0].nonce.toNumber()).to.be.equal(5);
+  });
+
   it("Transaction response stored into wallet storage if hash exists", async function () {
     const spy = sinon.spy(walletStorage, "saveTransaction");
     const transactionResponseStub = sinon.stub(
