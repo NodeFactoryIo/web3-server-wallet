@@ -73,7 +73,6 @@ export class TxMonitorService {
       transaction.gasPrice,
       this.options.gasPriceIncrease
     );
-    await this.wallet.walletStorage.deleteTransaction(transaction.hash);
     try {
       await this.wallet.sendTransaction({
         to: transaction.to,
@@ -87,6 +86,7 @@ export class TxMonitorService {
     } catch(error) {
       logger(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
     }
+    await this.wallet.walletStorage.deleteTransaction(transaction.hash);
   }
 
 
