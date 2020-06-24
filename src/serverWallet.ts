@@ -68,7 +68,7 @@ export class ServerWeb3Wallet extends Wallet {
         tx.nonce = await this.getNonce();
       }
 
-      const txResponse = await this.getTransactionResponse(tx);
+      const txResponse = await this.submitTransaction(tx);
       if(txResponse.hash) {
         await this.walletStorage.saveTransaction(txResponse);
       }
@@ -111,7 +111,7 @@ export class ServerWeb3Wallet extends Wallet {
     return;
   }
 
-  private async getTransactionResponse(tx: TransactionRequest): Promise<TransactionResponse> {
+  private async submitTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
     const populatedTx = await populateTransaction(tx, this.provider, this.address);
     const signedTx = await this.sign(populatedTx);
     return await this.provider.sendTransaction(signedTx);
