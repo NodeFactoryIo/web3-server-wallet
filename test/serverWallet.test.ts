@@ -70,7 +70,7 @@ describe("Server wallet sendTransaction", function () {
 
   it("Uses provided gas price if sent", async function () {
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -89,7 +89,7 @@ describe("Server wallet sendTransaction", function () {
   it("Assigns calculated gas price estimation", async function () {
     sinon.stub(utils, "estimateGasPrice").resolves(new BigNumber(10.0))
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -107,7 +107,7 @@ describe("Server wallet sendTransaction", function () {
 
   it("Uses limit gas price if gas price higher", async function () {
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -126,7 +126,7 @@ describe("Server wallet sendTransaction", function () {
 
   it("Uses default nonce if sent", async function () {
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -154,7 +154,7 @@ describe("Server wallet sendTransaction", function () {
       2
     );
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -180,7 +180,7 @@ describe("Server wallet sendTransaction", function () {
       2
     );
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -206,7 +206,7 @@ describe("Server wallet sendTransaction", function () {
       2
     );
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -230,7 +230,7 @@ describe("Server wallet sendTransaction", function () {
       return [] as SavedTransactionResponse[]
     }
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves(sinon.stub() as TransactionResponse)
     const tx = {
       to: "to-address",
@@ -258,7 +258,7 @@ describe("Server wallet sendTransaction", function () {
       transactions.push(tx as unknown as SavedTransactionResponse);
     }
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves({hash: "test-hash", nonce: 4} as TransactionResponse)
 
     const tx1 = {
@@ -288,7 +288,7 @@ describe("Server wallet sendTransaction", function () {
   it("Transaction response stored into wallet storage if hash exists", async function () {
     const spy = sinon.spy(walletStorage, "saveTransaction");
     const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "getTransactionResponse"
+      web3Wallet as any, "submitTransaction"
     ).resolves({hash: "hash"} as SavedTransactionResponse)
     const tx = {
       to: "to-address",
