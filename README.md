@@ -24,6 +24,10 @@ higher gas price and track its progress.
 
 This package requires for [IWalletTransactionStorage](src/@types/wallet.ts) and [IWalletSourceStorage](src/@types/wallets.ts) interface to be implemented to store sent transactions and available wallets.
 
+### Gas Price
+This package uses [eth gas station api](https://www.ethgasstation.info/) by default and GAS_STATION_API_KEY should be in process.env for it to work.
+It will fallback to provider.estimateGasPrice if gas station estimation does not work.
+
 ## License
 
 [MIT](LICENSE)
