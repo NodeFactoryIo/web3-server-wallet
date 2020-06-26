@@ -1,7 +1,8 @@
 import axios from "axios";
 import {BigNumber, parseUnits} from "ethers/utils";
 import {SavedTransactionResponse} from "./@types/wallet";
-import {Provider, TransactionResponse} from "ethers/providers";
+import {TransactionResponse} from "ethers/providers";
+import {logger} from "./logger";
 
 const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
 
@@ -14,10 +15,20 @@ export async function estimateGasPrice(
   gasPriceOption: string,
 ): Promise<BigNumber | undefined> {
   try {
-    const response = await axios.get(GAS_PRICE_API)
-    const gasPrice = response.data[gasPriceOption];
-    return parseUnits((gasPrice * 10).toString(), "gwei");
+    if(process.env.GAS_STATION_API_KEY) {
+      const response = await axios.get(
+        GAS_PRICE_API,
+        {
+          params: {
+            "api-key": process.env.GAS_STATION_API_KEY
+          }
+        }
+      )
+      const gasPrice = response.data[gasPriceOption];
+      return parseUnits((gasPrice * 10).toString(), "gwei");
+    }
   } catch(error) {
+    logger("Gas station api not available.");
     return;
   }
 }

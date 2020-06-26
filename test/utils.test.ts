@@ -17,6 +17,7 @@ describe("Estimate gas price", function () {
 
   beforeEach(function () {
     providerStub = sinon.stub() as Provider;
+    process.env.GAS_STATION_API_KEY = "api-key"
   });
 
   afterEach(function () {
@@ -33,7 +34,18 @@ describe("Estimate gas price", function () {
     expect(gasPrice.toNumber()).to.be.deep.equal(100000000000);
   });
 
-  it("Returns undefined if gas station fails", async function() {
+  it("Returns undefined if gas station api key missing", async function() {
+    process.env.GAS_STATION_API_KEY = undefined;
+    sinon.stub(axios, "get").resolves(
+      new Error()
+    );
+
+    const gasPrice = await estimateGasPrice("safeLow");
+
+    expect(gasPrice).to.be.deep.equal(undefined);
+  });
+
+  it("Returns undefined if gas station returns error", async function() {
     sinon.stub(axios, "get").resolves(
       new Error()
     );
