@@ -5,12 +5,12 @@ the ethereum netowork.
 
 # Usage
 
-Install with `yarn add web3-server-wallet` or `npm i web3-server-wallet`
+Install with `yarn add @nodefactory/web3-server-wallet` or `npm i @nodefactory/web3-server-wallet`
 
 Example of usage:
 
 ```typescript
-import {ServerWeb3Wallet, TxMonitorService} from "web3-server-wallet";
+import {ServerWeb3Wallet, TxMonitorService} from "@nodefactory/web3-server-wallet";
 
 const wallet = await ServerWeb3Wallet.create(walletSource, walletStorage);
 const monitorService = new TxMonitorService(wallet);
