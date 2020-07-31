@@ -1,7 +1,6 @@
-import {SigningKey} from "ethers/utils";
-import {TransactionResponse} from "ethers/providers/abstract-provider";
+import {utils, providers} from "ethers";
 
-export type SavedTransactionResponse = TransactionResponse & {
+export type SavedTransactionResponse = providers.TransactionResponse & {
   submitTime: number;
   hash: string;
 };
@@ -10,7 +9,7 @@ export interface IWalletSourceStorage {
   /**
    * Assigns wallet and removes it from available pool of wallets.
    */
-  assignWallet(): Promise<SigningKey | undefined>;
+  assignWallet(): Promise<utils.SigningKey | undefined>;
   /**
    * Releases assigned wallet and returns it to pool of available wallets.
    */
@@ -25,7 +24,7 @@ export interface IWalletTransactionStorage {
   /**
    * Saves transaction to storage with submit time.
    */
-  saveTransaction(tx: TransactionResponse): Promise<void>;
+  saveTransaction(tx: providers.TransactionResponse): Promise<void>;
   /**
    * Deletes transaction from storage by hash.
    */
