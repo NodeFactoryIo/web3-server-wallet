@@ -3,16 +3,15 @@ import sinon, {SinonStubbedInstance} from "sinon";
 import {ServerWeb3Wallet} from "../src/serverWallet";
 import {TxMonitorService} from "../src/monitorService";
 import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
-import {BigNumber} from "ethers/utils";
 import * as utils from "../src/utils";
-import { Provider } from "ethers/providers";
+import {providers, BigNumber} from "ethers";
 
 describe("Transaction monitor service", function () {
 
   let web3WalletStub: SinonStubbedInstance<ServerWeb3Wallet>;
   let txMonitorService: TxMonitorService;
   let walletStorage: IWalletTransactionStorage;
-  let providerStub: Provider;
+  let providerStub: providers.Provider;
 
   beforeEach(function () {
     web3WalletStub = sinon.createStubInstance(ServerWeb3Wallet);
@@ -20,7 +19,7 @@ describe("Transaction monitor service", function () {
     walletStorage.deleteTransaction = async function deleteTransaction(hash: string) {
       return;
     }
-    providerStub = sinon.stub() as Provider;
+    providerStub = sinon.stub() as providers.Provider;
     web3WalletStub.provider = providerStub;
     web3WalletStub.walletStorage = walletStorage;
     txMonitorService = new TxMonitorService(web3WalletStub);
@@ -74,7 +73,7 @@ describe("Transaction monitor service", function () {
     web3WalletStub.provider.getTransaction = async () => {
       return transaction;
     }
-    sinon.stub(utils, "recalculateGasPrice").resolves(new BigNumber(12.0))
+    sinon.stub(utils, "recalculateGasPrice").resolves(BigNumber.from(12.0))
     const spy = sinon.spy(utils, "transactionIsOld");
 
     txMonitorService.start(20);
@@ -89,14 +88,14 @@ describe("Transaction monitor service", function () {
   it("Check transaction ignores other transactions after resending", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
-        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
+        {nonce: 1, gasPrice: BigNumber.from(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
+        {nonce: 2, gasPrice: BigNumber.from(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
       ];
     }
     web3WalletStub.provider.getTransaction = async () => {
       return {};
     }
-    sinon.stub(utils, "recalculateGasPrice").resolves(new BigNumber(12.0))
+    sinon.stub(utils, "recalculateGasPrice").resolves(BigNumber.from(12.0))
     const stub = web3WalletStub.sendTransaction.resolves()
 
     txMonitorService.start(20);
@@ -111,14 +110,14 @@ describe("Transaction monitor service", function () {
   it("Check transaction resends transaction that is older than 3 minutes", function (done) {
     walletStorage.getTransactions = async function getTransactions() {
       return [
-        {nonce: 1, gasPrice: new BigNumber(12), submitTime: new Date().getTime()} as SavedTransactionResponse,
-        {nonce: 2, gasPrice: new BigNumber(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
+        {nonce: 1, gasPrice: BigNumber.from(12), submitTime: new Date().getTime()} as SavedTransactionResponse,
+        {nonce: 2, gasPrice: BigNumber.from(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
       ];
     }
     web3WalletStub.provider.getTransaction = async () => {
       return {};
     }
-    sinon.stub(utils, "recalculateGasPrice").resolves(new BigNumber(12.0))
+    sinon.stub(utils, "recalculateGasPrice").resolves(BigNumber.from(12.0))
     const sendTransactionStub = web3WalletStub.sendTransaction.resolves()
 
     txMonitorService.start(20);

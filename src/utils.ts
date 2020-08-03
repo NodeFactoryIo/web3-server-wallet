@@ -1,7 +1,6 @@
 import axios from "axios";
-import {BigNumber, parseUnits} from "ethers/utils";
+import {BigNumber, utils, providers} from "ethers";
 import {SavedTransactionResponse} from "./@types/wallet";
-import {TransactionResponse} from "ethers/providers";
 import {logger} from "./logger";
 
 const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
@@ -25,7 +24,7 @@ export async function estimateGasPrice(
         }
       )
       const gasPrice = response.data[gasPriceOption];
-      return parseUnits((gasPrice * 10).toString(), "gwei");
+      return utils.parseUnits((gasPrice * 10).toString(), "gwei");
     }
   } catch(error) {
     logger("Gas station api not available.");
@@ -33,7 +32,10 @@ export async function estimateGasPrice(
   }
 }
 
-export function transactionIsConfirmed(transaction: TransactionResponse, neededConfirmations: number): boolean {
+export function transactionIsConfirmed(
+  transaction: providers.TransactionResponse,
+  neededConfirmations: number
+): boolean {
   if(
     transaction &&
     transaction.blockNumber &&
@@ -56,7 +58,7 @@ export function transactionIsOld(
   return false;
 }
 
-export function transactionNotInBlock(transaction: TransactionResponse): boolean {
+export function transactionNotInBlock(transaction: providers.TransactionResponse): boolean {
   if(transaction && transaction.blockNumber) {
     return false;
   }
@@ -73,5 +75,5 @@ export async function recalculateGasPrice(
     return estimatedGasPrice;
   }
 
-  return new BigNumber(Math.round(gasPrice.toNumber() * gasPriceIncrease));
+  return BigNumber.from(Math.round(gasPrice.toNumber() * gasPriceIncrease));
 }

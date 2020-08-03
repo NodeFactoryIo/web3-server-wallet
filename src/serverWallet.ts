@@ -1,21 +1,19 @@
-import {Wallet} from "ethers";
-import {SigningKey, BigNumber, populateTransaction} from "ethers/utils";
+import {Wallet, providers, BigNumber, utils} from "ethers";
 import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet";
-import {TransactionRequest, TransactionResponse, Provider} from "ethers/providers";
 import {estimateGasPrice} from "./utils";
 import pushable, {Pushable} from "it-pushable";
 
 export class ServerWeb3Wallet extends Wallet {
-  private transactionQueue: Pushable<TransactionRequest>;
-  private sendTransactionQueue: AsyncGenerator<TransactionResponse>;
+  private transactionQueue: Pushable<providers.TransactionRequest>;
+  private sendTransactionQueue: AsyncGenerator<providers.TransactionResponse>;
 
   public walletStorage: IWalletTransactionStorage;
   public gasPriceLimit: number;
 
   protected constructor(
-    key: SigningKey,
+    key: utils.SigningKey,
     walletStorage: IWalletTransactionStorage,
-    provider?: Provider,
+    provider?: providers.Provider,
     gasPriceLimit=50000000000
   ) {
     super(key, provider);
@@ -28,7 +26,7 @@ export class ServerWeb3Wallet extends Wallet {
   public static async create(
     walletSourceStorage: IWalletSourceStorage,
     walletTransactionStorage: IWalletTransactionStorage,
-    provider?: Provider,
+    provider?: providers.Provider,
     gasPriceLimit?: number
   ): Promise<ServerWeb3Wallet | undefined> {
     const assignedWallet = await walletSourceStorage.assignWallet();
@@ -44,9 +42,9 @@ export class ServerWeb3Wallet extends Wallet {
   }
 
   public async sendTransaction(
-    tx: TransactionRequest,
+    tx: providers.TransactionRequest,
     gasPriceOption="safeLow",
-  ): Promise<TransactionResponse> {
+  ): Promise<providers.TransactionResponse> {
 
     if(tx.gasPrice == null) {
       tx.gasPrice = await estimateGasPrice(
@@ -55,14 +53,14 @@ export class ServerWeb3Wallet extends Wallet {
     }
 
     if(tx.gasPrice && tx.gasPrice > this.gasPriceLimit) {
-      tx.gasPrice = new BigNumber(this.gasPriceLimit);
+      tx.gasPrice = BigNumber.from(this.gasPriceLimit);
     }
 
     this.transactionQueue.push(tx);
     return (await this.sendTransactionQueue.next()).value;
   }
 
-  private async *sendTransactionGenerator(): AsyncGenerator<TransactionResponse> {
+  private async *sendTransactionGenerator(): AsyncGenerator<providers.TransactionResponse> {
     for await (const tx of this.transactionQueue) {
       if(tx.nonce == null){
         tx.nonce = await this.getNonce();
@@ -84,14 +82,14 @@ export class ServerWeb3Wallet extends Wallet {
 
     const gapNonce = this.findGapNonce(transactions, transactionCount);
     if(gapNonce) {
-      return new BigNumber(gapNonce);
+      return BigNumber.from(gapNonce);
     }
 
     if(transactions.length) {
-      return new BigNumber(transactions[transactions.length - 1].nonce + 1);
+      return BigNumber.from(transactions[transactions.length - 1].nonce + 1);
     }
 
-    return new BigNumber(transactionCount);
+    return BigNumber.from(transactionCount);
   }
 
   private findGapNonce(
@@ -111,9 +109,9 @@ export class ServerWeb3Wallet extends Wallet {
     return;
   }
 
-  private async submitTransaction(tx: TransactionRequest): Promise<TransactionResponse> {
-    const populatedTx = await populateTransaction(tx, this.provider, this.address);
-    const signedTx = await this.sign(populatedTx);
+  private async submitTransaction(tx: providers.TransactionRequest): Promise<providers.TransactionResponse> {
+    const populatedTx = await this.populateTransaction(tx);
+    const signedTx = await this.signTransaction(populatedTx);
     return await this.provider.sendTransaction(signedTx);
   }
 
