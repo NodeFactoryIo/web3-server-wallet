@@ -3,6 +3,8 @@
 This repository contains TypeScript implementation of monitor service for transactions on
 the ethereum netowork.
 
+For ethers@4.0.X use web3-server-wallet@0.1.X!
+
 # Usage
 
 Install with `yarn add @nodefactory/web3-server-wallet` or `npm i @nodefactory/web3-server-wallet`
