@@ -66,7 +66,7 @@ export class ServerWeb3Wallet extends Wallet {
     return result;
   }
 
-  private async *sendTransactionGenerator(): AsyncGenerator<providers.TransactionResponse | any> {
+  private async *sendTransactionGenerator(): AsyncGenerator<providers.TransactionResponse | Error> {
     for await (const tx of this.transactionQueue) {
       if(tx.nonce == null){
         tx.nonce = await this.getNonce();
