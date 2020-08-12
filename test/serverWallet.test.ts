@@ -303,7 +303,7 @@ describe("Server wallet sendTransaction", function () {
     expect(spy.calledOnce).to.be.deep.equal(true);
   });
 
-  it("Transaction response stored into wallet storage if hash exists", async function () {
+  it("Send transaction generator continues after error", async function () {
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
     )
