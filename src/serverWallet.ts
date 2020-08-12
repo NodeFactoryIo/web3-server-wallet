@@ -5,7 +5,7 @@ import pushable, {Pushable} from "it-pushable";
 
 export class ServerWeb3Wallet extends Wallet {
   private transactionQueue: Pushable<providers.TransactionRequest>;
-  private sendTransactionQueue: AsyncGenerator<providers.TransactionResponse>;
+  private sendTransactionQueue: AsyncGenerator<providers.TransactionResponse | Error>;
 
   public walletStorage: IWalletTransactionStorage;
   public gasPriceLimit: number;

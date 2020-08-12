@@ -307,7 +307,7 @@ describe("Server wallet sendTransaction", function () {
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
     )
-    transactionResponseStub.onFirstCall().callsFake(() => { throw new Error("Invalid params"); });
+    transactionResponseStub.onFirstCall().callsFake(() => { throw new TypeError("Invalid params"); });
     transactionResponseStub.onSecondCall().resolves({hash: "hash"} as SavedTransactionResponse);
 
     const tx = {
