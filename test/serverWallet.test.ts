@@ -1,9 +1,8 @@
-import {expect} from "chai";
-import axios from "axios";
+import {expect, assert} from "chai";
 import sinon, {SinonStubbedInstance} from "sinon";
 import {ServerWeb3Wallet} from "../src/serverWallet";
 import {IWalletTransactionStorage, SavedTransactionResponse, IWalletSourceStorage} from "../src/@types/wallet";
-import {providers, utils, BigNumber, Transaction} from "ethers";
+import {providers, utils, BigNumber} from "ethers";
 import * as utilsModule from "../src/utils";
 
 describe("Server wallet sendTransaction", function () {
@@ -303,5 +302,36 @@ describe("Server wallet sendTransaction", function () {
 
     expect(spy.calledOnce).to.be.deep.equal(true);
   });
+
+  it("Transaction response stored into wallet storage if hash exists", async function () {
+    const transactionResponseStub = sinon.stub(
+      web3Wallet as any, "submitTransaction"
+    )
+    transactionResponseStub.onFirstCall().callsFake(() => { throw new Error("Invalid params"); });
+    transactionResponseStub.onSecondCall().resolves({hash: "hash"} as SavedTransactionResponse);
+
+    const tx = {
+      to: "to-address",
+      gasLimit: 21000,
+      gasPrice: 10.00,
+      nonce: 1,
+      data: "data",
+      value: 121,
+      chainId: 1
+    }
+
+    try {
+      await web3Wallet.sendTransaction(tx);
+      assert.fail("Error not thrown");
+    } catch (error) {
+      expect(error.message).to.be.deep.equal("Invalid params");
+    }
+
+    const txResponse2 = await web3Wallet.sendTransaction(tx);
+
+    expect(txResponse2.hash).to.be.deep.equal("hash");
+  });
+
+
 
 });
