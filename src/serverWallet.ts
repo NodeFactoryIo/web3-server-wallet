@@ -5,7 +5,7 @@ import pushable, {Pushable} from "it-pushable";
 
 export class ServerWeb3Wallet extends Wallet {
   private transactionQueue: Pushable<providers.TransactionRequest>;
-  private sendTransactionQueue: AsyncGenerator<providers.TransactionResponse>;
+  private sendTransactionQueue: AsyncGenerator<providers.TransactionResponse | Error>;
 
   public walletStorage: IWalletTransactionStorage;
   public gasPriceLimit: number;
@@ -57,20 +57,30 @@ export class ServerWeb3Wallet extends Wallet {
     }
 
     this.transactionQueue.push(tx);
-    return (await this.sendTransactionQueue.next()).value;
+    const result = (await this.sendTransactionQueue.next()).value;
+
+    if(result instanceof Error) {
+      throw result;
+    }
+
+    return result;
   }
 
-  private async *sendTransactionGenerator(): AsyncGenerator<providers.TransactionResponse> {
+  private async *sendTransactionGenerator(): AsyncGenerator<providers.TransactionResponse | Error> {
     for await (const tx of this.transactionQueue) {
-      if(tx.nonce == null){
-        tx.nonce = await this.getNonce();
-      }
+      try {
+        if(tx.nonce == null){
+          tx.nonce = await this.getNonce();
+        }
 
-      const txResponse = await this.submitTransaction(tx);
-      if(txResponse.hash) {
-        await this.walletStorage.saveTransaction(txResponse);
+        const txResponse = await this.submitTransaction(tx);
+        if(txResponse.hash) {
+          await this.walletStorage.saveTransaction(txResponse);
+        }
+        yield txResponse;
+      } catch (error) {
+        yield error;
       }
-      yield txResponse;
     }
   }
 
