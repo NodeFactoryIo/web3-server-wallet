@@ -25,12 +25,12 @@ describe("Estimate gas price", function () {
 
   it("Looks for gas price on eth gas station by default", async function() {
     sinon.stub(axios, "get").resolves(
-      {data: {safeLow: 10}, status: 200}
+      {data: {safeLow: 1370}, status: 200}
     )
 
     const gasPrice = await estimateGasPrice("safeLow");
 
-    expect(gasPrice.toNumber()).to.be.deep.equal(100000000000);
+    expect(gasPrice.toNumber()).to.be.deep.equal(137000000000);
   });
 
   it("Returns undefined if gas station api key missing", async function() {
@@ -143,12 +143,12 @@ describe("Recalculate gas price", function () {
   {
     const transaction = sinon.stub() as SavedTransactionResponse;
     sinon.stub(axios, "get").resolves(
-      {data: {fastest: 24}, status: 200}
+      {data: {fastest: 1760}, status: 200}
     )
 
-    const gasPrice = await recalculateGasPrice(BigNumber.from(20000000000), 1.2);
+    const gasPrice = await recalculateGasPrice(BigNumber.from(20000000), 1.2);
 
-    expect(gasPrice.toNumber()).to.be.deep.equal(240000000000);
+    expect(gasPrice.toNumber()).to.be.deep.equal(176000000000);
   });
 
   it(
