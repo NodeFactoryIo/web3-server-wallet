@@ -1,7 +1,6 @@
 import axios from "axios";
-import {BigNumber, parseUnits} from "ethers/utils";
+import {utils, providers} from "ethers";
 import {SavedTransactionResponse} from "./@types/wallet";
-import {TransactionResponse} from "ethers/providers";
 import {logger} from "./logger";
 
 const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
@@ -13,7 +12,7 @@ const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
  */
 export async function estimateGasPrice(
   gasPriceOption: string,
-): Promise<BigNumber | undefined> {
+): Promise<utils.BigNumber | undefined> {
   try {
     if(process.env.GAS_STATION_API_KEY) {
       const response = await axios.get(
@@ -25,7 +24,7 @@ export async function estimateGasPrice(
         }
       )
       const gasPrice = response.data[gasPriceOption];
-      return parseUnits((gasPrice * 10).toString(), "gwei");
+      return utils.parseUnits((gasPrice / 10).toString(), "gwei");
     }
   } catch(error) {
     logger("Gas station api not available.");
@@ -33,7 +32,10 @@ export async function estimateGasPrice(
   }
 }
 
-export function transactionIsConfirmed(transaction: TransactionResponse, neededConfirmations: number): boolean {
+export function transactionIsConfirmed(
+  transaction: providers.TransactionResponse,
+  neededConfirmations: number
+): boolean {
   if(
     transaction &&
     transaction.blockNumber &&
@@ -56,7 +58,7 @@ export function transactionIsOld(
   return false;
 }
 
-export function transactionNotInBlock(transaction: TransactionResponse): boolean {
+export function transactionNotInBlock(transaction: providers.TransactionResponse): boolean {
   if(transaction && transaction.blockNumber) {
     return false;
   }
@@ -65,13 +67,13 @@ export function transactionNotInBlock(transaction: TransactionResponse): boolean
 }
 
 export async function recalculateGasPrice(
-  gasPrice: BigNumber,
+  gasPrice: utils.BigNumber,
   gasPriceIncrease: number,
-): Promise<BigNumber> {
+): Promise<utils.BigNumber> {
   const estimatedGasPrice = await estimateGasPrice("fastest");
-  if(estimatedGasPrice && gasPrice < estimatedGasPrice) {
+  if(estimatedGasPrice && gasPrice.lt(estimatedGasPrice)) {
     return estimatedGasPrice;
   }
 
-  return new BigNumber(Math.round(gasPrice.toNumber() * gasPriceIncrease));
+  return new utils.BigNumber(Math.round(gasPrice.toNumber() * gasPriceIncrease));
 }

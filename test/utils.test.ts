@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import sinon, {SinonStubbedInstance} from "sinon";
 import axios from "axios";
-import {BigNumber} from "ethers/utils";
+import {utils, providers} from "ethers";
 import {
   estimateGasPrice,
   transactionIsConfirmed,
@@ -9,14 +9,13 @@ import {
   recalculateGasPrice,
   transactionNotInBlock
 } from "../src/utils";
-import {Provider, TransactionResponse} from "ethers/providers";
 import {SavedTransactionResponse} from "../src/@types/wallet";
 
 describe("Estimate gas price", function () {
-  let providerStub: SinonStubbedInstance<Provider>;
+  let providerStub: SinonStubbedInstance<providers.Provider>;
 
   beforeEach(function () {
-    providerStub = sinon.stub() as Provider;
+    providerStub = sinon.stub() as providers.Provider;
     process.env.GAS_STATION_API_KEY = "api-key"
   });
 
@@ -26,12 +25,12 @@ describe("Estimate gas price", function () {
 
   it("Looks for gas price on eth gas station by default", async function() {
     sinon.stub(axios, "get").resolves(
-      {data: {safeLow: 10}, status: 200}
+      {data: {safeLow: 1370}, status: 200}
     )
 
     const gasPrice = await estimateGasPrice("safeLow");
 
-    expect(gasPrice.toNumber()).to.be.deep.equal(100000000000);
+    expect(gasPrice.toNumber()).to.be.deep.equal(137000000000);
   });
 
   it("Returns undefined if gas station api key missing", async function() {
@@ -114,7 +113,7 @@ describe("Transaction is old", function () {
 describe("Transaction not in block", function () {
 
   it("Returns false if transaction has block number", async function() {
-    const transaction = sinon.stub() as TransactionResponse;
+    const transaction = sinon.stub() as providers.TransactionResponse;
     transaction.blockNumber = 1;
 
     const isInBlock = transactionNotInBlock(transaction);
@@ -123,7 +122,7 @@ describe("Transaction not in block", function () {
   });
 
   it("Returns true if transaction not in block", function() {
-    const transaction = sinon.stub() as TransactionResponse;
+    const transaction = sinon.stub() as providers.TransactionResponse;
 
     const isInBlock = transactionNotInBlock(transaction);
 
@@ -144,12 +143,12 @@ describe("Recalculate gas price", function () {
   {
     const transaction = sinon.stub() as SavedTransactionResponse;
     sinon.stub(axios, "get").resolves(
-      {data: {fastest: 24}, status: 200}
+      {data: {fastest: 1760}, status: 200}
     )
 
-    const gasPrice = await recalculateGasPrice(new BigNumber(20000000000), 1.2);
+    const gasPrice = await recalculateGasPrice(new utils.BigNumber(20000000), 1.2);
 
-    expect(gasPrice.toNumber()).to.be.deep.equal(240000000000);
+    expect(gasPrice.toNumber()).to.be.deep.equal(176000000000);
   });
 
   it(
@@ -161,7 +160,7 @@ describe("Recalculate gas price", function () {
       {data: {fastest: 18}, status: 200}
     )
 
-    const gasPrice = await recalculateGasPrice(new BigNumber(200000000000), 1.1);
+    const gasPrice = await recalculateGasPrice(new utils.BigNumber(200000000000), 1.1);
 
     expect(gasPrice.toNumber()).to.be.deep.equal(220000000000);
   });
