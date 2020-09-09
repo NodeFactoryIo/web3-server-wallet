@@ -24,7 +24,7 @@ export async function estimateGasPrice(
         }
       )
       const gasPrice = response.data[gasPriceOption];
-      return utils.parseUnits((gasPrice * 10).toString(), "gwei");
+      return utils.parseUnits((gasPrice / 10).toString(), "gwei");
     }
   } catch(error) {
     logger("Gas station api not available.");
@@ -71,7 +71,7 @@ export async function recalculateGasPrice(
   gasPriceIncrease: number,
 ): Promise<BigNumber> {
   const estimatedGasPrice = await estimateGasPrice("fastest");
-  if(estimatedGasPrice && gasPrice < estimatedGasPrice) {
+  if(estimatedGasPrice && gasPrice.lt(estimatedGasPrice)) {
     return estimatedGasPrice;
   }
 
