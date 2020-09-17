@@ -1,8 +1,8 @@
 # Changelog
 
-## [v1.0.2](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v.1.0.2)
+## [v1.0.3](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v.1.0.3)
 
-[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.1...v.1.0.2)
+[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.1...v.1.0.3)
 
 ### Fixed
 - Fix gas station gas price [\#14](https://github.com/NodeFactoryIo/web3-server-wallet/pull/14) ([mpetrun5](https://github.com/mpetrun5))
