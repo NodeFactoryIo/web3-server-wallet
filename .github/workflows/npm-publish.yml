@@ -55,7 +55,7 @@ jobs:
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
         with:
-          version: ${{ needs.tag.outputs.version }}
+          version: ${{ needs.tag.outputs.tag }}
           path: ./CHANGELOG.md
 
       - name: Create Release
