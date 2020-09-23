@@ -10,7 +10,10 @@
     "dist",
     "src"
   ],
-  "repository": "git@github.com:nodefactory/web3-server-wallet.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:NodeFactoryIo/web3-server-wallet.git"
+  },
   "author": "Nodefactory",
   "license": "MIT",
   "keywords": [
