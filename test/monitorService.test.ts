@@ -5,22 +5,6 @@ import {TxMonitorService} from "../src/monitorService";
 import {IWalletTransactionStorage, SavedTransactionResponse} from "../src/@types/wallet";
 import * as utils from "../src/utils";
 import {providers, BigNumber} from "ethers";
-import {ILogger} from "../src/logger";
-
-class Logger implements ILogger {
-
-  public info(message: string) {
-    return message
-  }
-
-  public debug(message: string) {
-    return message
-  }
-
-  public error(message: string) {
-    return message
-  }
-}
 
 describe("Transaction monitor service", function () {
 
@@ -38,8 +22,7 @@ describe("Transaction monitor service", function () {
     providerStub = sinon.stub() as providers.Provider;
     web3WalletStub.provider = providerStub;
     web3WalletStub.walletStorage = walletStorage;
-    const logger = new Logger()
-    txMonitorService = new TxMonitorService(web3WalletStub, logger);
+    txMonitorService = new TxMonitorService(web3WalletStub);
   });
 
   afterEach(function () {

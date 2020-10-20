@@ -6,7 +6,7 @@ import {
   recalculateGasPrice,
   transactionNotInBlock
 } from "./utils";
-import {ILogger} from "./logger";
+import {defaultLogger, ILogger} from "./logger";
 
 interface ITxMonitorOptions {
   neededConfirmations: number;
@@ -26,7 +26,7 @@ export class TxMonitorService {
     transactionTimeout: 180000
   };
 
-  constructor(wallet: ServerWeb3Wallet, logger: ILogger, options?: Partial<ITxMonitorOptions>) {
+  constructor(wallet: ServerWeb3Wallet, logger=defaultLogger, options?: Partial<ITxMonitorOptions>) {
     this.wallet = wallet;
     this.logger = logger;
     this.options = Object.assign({}, this.defaultOptions, options);

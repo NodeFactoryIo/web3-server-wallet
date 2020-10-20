@@ -52,14 +52,15 @@
     "bsert": "0.0.10",
     "chai": "^4.2.0",
     "eslint": "^6.6.0",
+    "ethers": "^5.0.X",
     "mocha": "^6.2.3",
     "sinon": "^9.0.2",
     "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4",
-    "ethers": "^5.0.X"
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "axios": ">=0.19.2",
+    "debug": "^4.2.0",
     "it-pushable": "^1.4.0"
   },
   "peerDependencies": {
