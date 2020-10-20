@@ -59,7 +59,9 @@
   },
   "dependencies": {
     "axios": ">=0.19.2",
-    "ethers": "^5.0.X",
     "it-pushable": "^1.4.0"
+  },
+  "peerDependencies": {
+    "ethers": ">=5"
   }
 }
