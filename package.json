@@ -55,7 +55,8 @@
     "mocha": "^6.2.3",
     "sinon": "^9.0.2",
     "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "ethers": "^5.0.X"
   },
   "dependencies": {
     "axios": ">=0.19.2",
