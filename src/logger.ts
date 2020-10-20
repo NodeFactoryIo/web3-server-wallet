@@ -1,3 +1,5 @@
-import debug from "debug";
-
-export const logger = debug("web3-server-wallet");
+export interface ILogger {
+  info(...params: any): any;
+  debug(...params: any): any;
+  error(...params: any): any;
+}

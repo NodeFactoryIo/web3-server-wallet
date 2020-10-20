@@ -1,7 +1,6 @@
 import axios from "axios";
 import {BigNumber, utils, providers} from "ethers";
 import {SavedTransactionResponse} from "./@types/wallet";
-import {logger} from "./logger";
 
 const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
 
@@ -27,7 +26,6 @@ export async function estimateGasPrice(
       return utils.parseUnits((gasPrice / 10).toString(), "gwei");
     }
   } catch(error) {
-    logger("Gas station api not available.");
     return;
   }
 }
