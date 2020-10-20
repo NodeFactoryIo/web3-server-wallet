@@ -1,9 +1,9 @@
 import debug from "debug";
 
 export interface ILogger<TReturn = void> {
-  info(...params: unknown[]): TReturn;
-  debug(...params: unknown[]): TReturn;
-  error(...params: unknown[]): TReturn;
+  info(msg: string, ...params: unknown[]): TReturn;
+  debug(msg: string, ...params: unknown[]): TReturn;
+  error(msg: string, ...params: unknown[]): TReturn;
 }
 
 export class DefaultLogger implements ILogger {
