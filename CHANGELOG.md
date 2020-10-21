@@ -1,6 +1,6 @@
 # Changelog
 
-## [v1.1.0](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v.1.1.0)
+## [v1.1.0](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v1.1.0)
 
 [Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.3...v.1.1.0)
 
@@ -12,7 +12,7 @@
 ### Changed
 
 
-## [v1.0.3](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v.1.0.3)
+## [v1.0.3](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v1.0.3)
 
 [Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.2...v.1.0.3)
 
