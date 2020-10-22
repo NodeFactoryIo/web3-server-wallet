@@ -26,7 +26,7 @@ export class TxMonitorService {
     transactionTimeout: 180000
   };
 
-  constructor(wallet: ServerWeb3Wallet, logger=defaultLogger, options?: Partial<ITxMonitorOptions>) {
+  constructor(wallet: ServerWeb3Wallet, logger: ILogger = defaultLogger, options?: Partial<ITxMonitorOptions>) {
     this.wallet = wallet;
     this.logger = logger;
     this.options = Object.assign({}, this.defaultOptions, options);
