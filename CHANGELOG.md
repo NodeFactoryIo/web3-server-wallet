@@ -1,8 +1,20 @@
 # Changelog
 
-## [v1.0.3](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v.1.0.3)
+## [v1.1.0](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v1.1.0)
 
-[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.1...v.1.0.3)
+[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.3...v.1.1.0)
+
+### Fixed
+
+### Added
+- Pass logger instance to tx monitor [\#21](https://github.com/NodeFactoryIo/web3-server-wallet/pull/21) ([mpetrun5](https://github.com/mpetrun5))
+
+### Changed
+
+
+## [v1.0.3](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v1.0.3)
+
+[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.0.2...v.1.0.3)
 
 ### Fixed
 - Fix gas station gas price [\#14](https://github.com/NodeFactoryIo/web3-server-wallet/pull/14) ([mpetrun5](https://github.com/mpetrun5))
