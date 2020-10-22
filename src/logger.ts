@@ -6,7 +6,7 @@ export interface ILogger<TReturn = void> {
   error(msg: string, ...params: unknown[]): TReturn;
 }
 
-export class DefaultLogger implements ILogger {
+class DefaultLogger implements ILogger {
   private infoLogger = debug("web3-server-wallet:INFO")
   private debugLogger = debug("web3-server-wallet:DEBUG")
   private errorLogger = debug("web3-server-wallet:ERROR")

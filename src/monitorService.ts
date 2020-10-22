@@ -13,6 +13,7 @@ interface ITxMonitorOptions {
   // number to time original gasPrice when resending it
   gasPriceIncrease: number;
   transactionTimeout: number;
+  logger: ILogger;
 }
 
 export class TxMonitorService {
@@ -23,13 +24,14 @@ export class TxMonitorService {
   private defaultOptions = {
     neededConfirmations: 5,
     gasPriceIncrease: 1.2,
-    transactionTimeout: 180000
+    transactionTimeout: 180000,
+    logger: defaultLogger
   };
 
-  constructor(wallet: ServerWeb3Wallet, logger=defaultLogger, options?: Partial<ITxMonitorOptions>) {
+  constructor(wallet: ServerWeb3Wallet, options?: Partial<ITxMonitorOptions>) {
     this.wallet = wallet;
-    this.logger = logger;
     this.options = Object.assign({}, this.defaultOptions, options);
+    this.logger = this.options.logger;
   };
 
   public async start(interval=300000): Promise<void> {
