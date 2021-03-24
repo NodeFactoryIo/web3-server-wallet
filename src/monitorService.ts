@@ -92,12 +92,12 @@ export class TxMonitorService {
         chainId: transaction.chainId,
         gasPrice: newGasPrice
       });
+
+      this.logger.debug(`Deleting transaction ${transaction.hash} from storage`);
+      await this.wallet.walletStorage.deleteTransaction(transaction.hash);
     } catch(error) {
       this.logger.error(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
     }
-
-    this.logger.debug(`Deleting transaction ${transaction.hash} from storage`);
-    await this.wallet.walletStorage.deleteTransaction(transaction.hash);
   }
 
 
