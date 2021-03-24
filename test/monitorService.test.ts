@@ -89,7 +89,10 @@ describe("Transaction monitor service", function () {
 
   });
 
-  it("Check transaction ignores other transactions after resending", function (done) {
+  it(
+    "Check transaction ignores other transactions after resending and deletes transaction if resubmit successful",
+    function (done)
+  {
     walletStorage.getTransactions = async function getTransactions() {
       return [
         {nonce: 1, gasPrice: BigNumber.from(12), submitTime: new Date().getTime() - 300000} as SavedTransactionResponse,
@@ -106,6 +109,7 @@ describe("Transaction monitor service", function () {
 
     setTimeout(() => {
       expect(stub.callCount).to.be.deep.equal(1);
+      expect(deleteTransactionSpy.callCount).to.be.deep.equal(1);
       done();
     }, 30)
 
