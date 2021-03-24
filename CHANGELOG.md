@@ -5,7 +5,7 @@
 [Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.1.1...v.1.1.2)
 
 ### Fixed
-- Avoid deleting transaction from storage if resubmiting fails [\#24](https://github.com/NodeFactoryIo/web3-server-wallet/pull/24) ([mpetrun5](https://github.com/mpetrun5))
+- Avoid deleting transaction from storage if resubmiting fails [\#27](https://github.com/NodeFactoryIo/web3-server-wallet/pull/27) ([mpetrun5](https://github.com/mpetrun5))
 
 ### Added
 
