@@ -6,28 +6,32 @@ import {
   recalculateGasPrice,
   transactionNotInBlock
 } from "./utils";
-import {logger} from "./logger";
+import {defaultLogger, ILogger} from "./logger";
 
 interface ITxMonitorOptions {
   neededConfirmations: number;
   // number to time original gasPrice when resending it
   gasPriceIncrease: number;
   transactionTimeout: number;
+  logger: ILogger;
 }
 
 export class TxMonitorService {
   private wallet: ServerWeb3Wallet;
+  private logger: ILogger;
   private intervalId?: NodeJS.Timeout;
   private options: ITxMonitorOptions;
   private defaultOptions = {
     neededConfirmations: 5,
     gasPriceIncrease: 1.2,
-    transactionTimeout: 180000
+    transactionTimeout: 180000,
+    logger: defaultLogger
   };
 
   constructor(wallet: ServerWeb3Wallet, options?: Partial<ITxMonitorOptions>) {
     this.wallet = wallet;
     this.options = Object.assign({}, this.defaultOptions, options);
+    this.logger = this.options.logger;
   };
 
   public async start(interval=300000): Promise<void> {
@@ -74,6 +78,11 @@ export class TxMonitorService {
       this.options.gasPriceIncrease
     );
     try {
+      this.logger.debug(
+        `Resending transaction ${transaction.hash}.
+        Old gas: ${transaction.gasPrice}.
+        New gas price: ${transaction.gasPrice}`
+      );
       await this.wallet.sendTransaction({
         to: transaction.to,
         nonce: transaction.nonce,
@@ -83,10 +92,12 @@ export class TxMonitorService {
         chainId: transaction.chainId,
         gasPrice: newGasPrice
       });
+
+      this.logger.debug(`Deleting transaction ${transaction.hash} from storage`);
+      await this.wallet.walletStorage.deleteTransaction(transaction.hash);
     } catch(error) {
-      logger(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
+      this.logger.error(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
     }
-    await this.wallet.walletStorage.deleteTransaction(transaction.hash);
   }
 
 

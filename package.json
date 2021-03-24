@@ -1,6 +1,6 @@
 {
   "name": "@nodefactory/web3-server-wallet",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "publishConfig": {
@@ -10,7 +10,10 @@
     "dist",
     "src"
   ],
-  "repository": "git@github.com:nodefactory/web3-server-wallet.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:NodeFactoryIo/web3-server-wallet.git"
+  },
   "author": "Nodefactory",
   "license": "MIT",
   "keywords": [
@@ -44,20 +47,25 @@
     "@types/chai": "^4.2.4",
     "@types/debug": "^4.1.5",
     "@types/mocha": "^5.2.7",
+    "@types/sinon": "^9.0.11",
     "@typescript-eslint/eslint-plugin": "^2.6.0",
     "@typescript-eslint/parser": "^2.6.0",
     "bsert": "0.0.10",
     "chai": "^4.2.0",
     "eslint": "^6.6.0",
+    "ethers": "^5.0.X",
     "mocha": "^6.2.3",
     "sinon": "^9.0.2",
     "ts-loader": "^6.2.1",
     "typescript": "^3.6.4"
   },
   "dependencies": {
-    "axios": ">=0.19.2",
-    "debug": "^4.1.1",
     "ethers": "^4.0.X",
+    "axios": ">=0.21.1",
+    "debug": "^4.2.0",
     "it-pushable": "^1.4.0"
+  },
+  "peerDependencies": {
+    "ethers": ">=5"
   }
 }
