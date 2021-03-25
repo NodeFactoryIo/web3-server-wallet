@@ -14,8 +14,9 @@ jobs:
       - name: Create tag
         id: tag
         uses: butlerlogic/action-autotag@stable
-        with:
+        env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
           strategy: package # Optional, since "package" is the default strategy
           tag_prefix: "v"
     outputs:
