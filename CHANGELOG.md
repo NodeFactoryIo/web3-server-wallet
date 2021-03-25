@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.1.4](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v0.1.4)
+
+[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v0.1.3...v.0.1.4)
+
+### Fixed
+- Fix ether version
+
+### Added
+
+### Changed
+
 ## [v0.1.3](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v0.1.3)
 
 [Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v0.1.2...v.0.1.3)
