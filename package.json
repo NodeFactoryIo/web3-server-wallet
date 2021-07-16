@@ -3,6 +3,7 @@
   "version": "1.1.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "homepage": "https://github.com/NodeFactoryIo/web3-server-wallet",
   "publishConfig": {
     "access": "public"
   },
@@ -12,9 +13,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git@github.com:NodeFactoryIo/web3-server-wallet.git"
+    "url": "git+https://github.com/NodeFactoryIo/web3-server-wallet.git"
   },
-  "author": "Nodefactory",
+  "author": "NodeFactory <info@nodefactory.io>",
   "license": "MIT",
   "keywords": [
     "web3",
