@@ -1,12 +1,13 @@
-import {ServerWeb3Wallet} from "./serverWallet";
-import {SavedTransactionResponse} from "./@types/wallet";
+import { ServerWeb3Wallet } from "./serverWallet";
+import { SavedTransactionResponse } from "./@types/wallet";
 import {
   transactionIsConfirmed,
   transactionIsOld,
   recalculateGasPrice,
   transactionNotInBlock
 } from "./utils";
-import {defaultLogger, ILogger} from "./logger";
+import { defaultLogger, ILogger } from "./logger";
+import { BigNumber } from "ethers";
 
 interface ITxMonitorOptions {
   neededConfirmations: number;
@@ -34,8 +35,8 @@ export class TxMonitorService {
     this.logger = this.options.logger;
   };
 
-  public async start(interval=300000): Promise<void> {
-    if(this.intervalId) {
+  public async start(interval = 300000): Promise<void> {
+    if (this.intervalId) {
       return;
     }
 
@@ -46,7 +47,7 @@ export class TxMonitorService {
   }
 
   public async stop(): Promise<void> {
-    if(this.intervalId) {
+    if (this.intervalId) {
       clearInterval(
         this.intervalId
       );
@@ -57,15 +58,18 @@ export class TxMonitorService {
     const transactions = await this.wallet.walletStorage.getTransactions(
       await this.wallet.getAddress()
     );
-    for(const transaction of transactions) {
+    const transactionCount = await this.wallet.getTransactionCount();
+    for (const transaction of transactions) {
       const transactionInfo = await this.wallet.provider.getTransaction(transaction.hash);
 
-      if(transactionIsConfirmed(transactionInfo, this.options.neededConfirmations)) {
+      //delete confirmed and out of date transactions
+      if (transactionIsConfirmed(transactionInfo, this.options.neededConfirmations)
+        || (!transactionInfo && transaction.nonce < transactionCount - 1)) {
         await this.wallet.walletStorage.deleteTransaction(transaction.hash);
         continue;
       }
 
-      if(transactionNotInBlock(transactionInfo) && transactionIsOld(transaction, this.options.transactionTimeout)) {
+      if (transactionNotInBlock(transactionInfo) && transactionIsOld(transaction, this.options.transactionTimeout)) {
         await this.resendTransaction(transaction);
         break;
       }
@@ -74,7 +78,7 @@ export class TxMonitorService {
 
   private async resendTransaction(transaction: SavedTransactionResponse): Promise<void> {
     const newGasPrice = await recalculateGasPrice(
-      transaction.gasPrice,
+      transaction.gasPrice ?? BigNumber.from(0),
       this.options.gasPriceIncrease
     );
     try {
@@ -95,7 +99,7 @@ export class TxMonitorService {
 
       this.logger.debug(`Deleting transaction ${transaction.hash} from storage`);
       await this.wallet.walletStorage.deleteTransaction(transaction.hash);
-    } catch(error) {
+    } catch (error) {
       this.logger.error(`Resending transaction with hash ${transaction.hash} failed, ${error.message}`);
     }
   }
