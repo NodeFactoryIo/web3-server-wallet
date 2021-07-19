@@ -1,7 +1,7 @@
-import {Wallet, providers, BigNumber, utils} from "ethers";
-import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet";
-import {estimateGasPrice} from "./utils";
-import pushable, {Pushable} from "it-pushable";
+import { Wallet, providers, BigNumber, utils } from "ethers";
+import { IWalletTransactionStorage, IWalletSourceStorage } from "./@types/wallet";
+import { estimateGasPrice } from "./utils";
+import pushable, { Pushable } from "it-pushable";
 import { defaultLogger } from "./logger";
 
 export class ServerWeb3Wallet extends Wallet {

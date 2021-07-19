@@ -1,6 +1,6 @@
 import axios from "axios";
-import {BigNumber, utils, providers} from "ethers";
-import {SavedTransactionResponse} from "./@types/wallet";
+import { BigNumber, utils, providers } from "ethers";
+import { SavedTransactionResponse } from "./@types/wallet";
 
 const GAS_PRICE_API = "https://ethgasstation.info/api/ethgasAPI.json"
 
