@@ -15,9 +15,9 @@ describe("Server wallet sendTransaction", function () {
 
   beforeEach(async function () {
     sinon.stub(providers.Provider, "isProvider").returns(true)
-    walletStorage = sinon.stub() as IWalletTransactionStorage;
-    walletSource = sinon.stub() as IWalletSourceStorage;
-    providerStub = sinon.stub() as providers.Provider;
+    walletStorage = sinon.stub() as unknown as IWalletTransactionStorage;
+    walletSource = sinon.stub() as unknown as IWalletSourceStorage;
+    providerStub = sinon.createStubInstance(providers.Provider);
     signingKey = new utils.SigningKey(
       "0xE5B21F1D68386B32407F2B63F49EE74CDAE4A80EE346EB90205B62D8BCDE9920"
     )
@@ -69,7 +69,7 @@ describe("Server wallet sendTransaction", function () {
   it("Uses provided gas price if sent", async function () {
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
     const tx = {
       to: "to-address",
       nonce: 0,
@@ -79,7 +79,7 @@ describe("Server wallet sendTransaction", function () {
       value: 121,
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].gasPrice).to.be.equal(20.00);
   });
@@ -88,7 +88,7 @@ describe("Server wallet sendTransaction", function () {
     sinon.stub(utilsModule, "estimateGasPrice").resolves(BigNumber.from(10.0))
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
     const tx = {
       to: "to-address",
       nonce: 0,
@@ -98,7 +98,7 @@ describe("Server wallet sendTransaction", function () {
       chainId: 1
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(10.0);
   });
@@ -106,7 +106,7 @@ describe("Server wallet sendTransaction", function () {
   it("Uses limit gas price if gas price higher", async function () {
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
     const tx = {
       to: "to-address",
       nonce: 0,
@@ -117,7 +117,7 @@ describe("Server wallet sendTransaction", function () {
       gasPrice: 51000000000
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].gasPrice.toNumber()).to.be.equal(50000000000);
   });
@@ -125,7 +125,7 @@ describe("Server wallet sendTransaction", function () {
   it("Uses default nonce if sent", async function () {
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
     const tx = {
       to: "to-address",
       gasLimit: 21000,
@@ -136,62 +136,9 @@ describe("Server wallet sendTransaction", function () {
       nonce: 6
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].nonce).to.be.equal(6);
-  });
-
-  it("Uses gap nonce if it exists", async function () {
-    walletStorage.getTransactions = async function getTransactions(){
-      return [
-        {nonce: 2} as unknown as SavedTransactionResponse,
-        {nonce: 4} as unknown as SavedTransactionResponse
-      ]
-    }
-    sinon.stub(web3Wallet, "getTransactionCount").resolves(
-      2
-    );
-    const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
-    const tx = {
-      to: "to-address",
-      gasLimit: 21000,
-      gasPrice: 10.00,
-      data: "data",
-      value: 121,
-      chainId: 1
-    }
-
-    const txResponse = await web3Wallet.sendTransaction(tx);
-
-    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(3);
-  });
-
-  it("Uses gap between first transaction and transaction count if it exists", async function () {
-    walletStorage.getTransactions = async function getTransactions(){
-      return [
-        {nonce: 3} as unknown as SavedTransactionResponse,
-      ]
-    }
-    sinon.stub(web3Wallet, "getTransactionCount").resolves(
-      2
-    );
-    const transactionResponseStub = sinon.stub(
-      web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
-    const tx = {
-      to: "to-address",
-      gasLimit: 21000,
-      gasPrice: 10.00,
-      data: "data",
-      value: 121,
-      chainId: 1
-    }
-
-    const txResponse = await web3Wallet.sendTransaction(tx);
-
-    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(2);
   });
 
   it("Assigns highest nonce + 1 if transactions exist", async function () {
@@ -205,7 +152,7 @@ describe("Server wallet sendTransaction", function () {
     );
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
     const tx = {
       to: "to-address",
       gasLimit: 21000,
@@ -215,7 +162,7 @@ describe("Server wallet sendTransaction", function () {
       chainId: 1
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(3);
   });
@@ -225,11 +172,13 @@ describe("Server wallet sendTransaction", function () {
       4
     );
     walletStorage.getTransactions = async function getTransactions(){
-      return [] as SavedTransactionResponse[]
+      return [
+        {nonce: 2} as unknown as SavedTransactionResponse
+      ]
     }
     const transactionResponseStub = sinon.stub(
       web3Wallet as any, "submitTransaction"
-    ).resolves(sinon.stub() as providers.TransactionResponse)
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
     const tx = {
       to: "to-address",
       gasLimit: 21000,
@@ -239,7 +188,31 @@ describe("Server wallet sendTransaction", function () {
       chainId: 1
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
+
+    expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(4);
+  });
+
+  it("Uses transaction count if nonce in transactions lower", async function () {
+    sinon.stub(web3Wallet, "getTransactionCount").resolves(
+      4
+    );
+    walletStorage.getTransactions = async function getTransactions(){
+      return [] as SavedTransactionResponse[]
+    }
+    const transactionResponseStub = sinon.stub(
+      web3Wallet as any, "submitTransaction"
+    ).resolves(sinon.stub() as unknown as providers.TransactionResponse)
+    const tx = {
+      to: "to-address",
+      gasLimit: 21000,
+      gasPrice: 10.00,
+      data: "data",
+      value: 121,
+      chainId: 1
+    }
+
+    await web3Wallet.sendTransaction(tx);
 
     expect(transactionResponseStub.args[0][0].nonce.toNumber()).to.be.equal(4);
   });
@@ -298,7 +271,7 @@ describe("Server wallet sendTransaction", function () {
       chainId: 1
     }
 
-    const txResponse = await web3Wallet.sendTransaction(tx);
+    await web3Wallet.sendTransaction(tx);
 
     expect(spy.calledOnce).to.be.deep.equal(true);
   });

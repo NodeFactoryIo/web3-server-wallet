@@ -94,12 +94,6 @@ export class ServerWeb3Wallet extends Wallet {
 
     let nonce = transactionCount;
 
-    const gapNonce = this.findGapNonce(transactions, transactionCount);
-    if(gapNonce) {
-      defaultLogger.debug("Found gap nonce " + gapNonce);
-      return BigNumber.from(gapNonce);
-    }
-
     if(transactions.length) {
       const storedNonce = transactions[transactions.length - 1].nonce + 1;
       //if stored nonce is lower than transaction count, we didn't store all transactions
@@ -108,24 +102,8 @@ export class ServerWeb3Wallet extends Wallet {
         nonce = storedNonce;
       }
     }
+
     return BigNumber.from(nonce);
-  }
-
-  private findGapNonce(
-    transactions: SavedTransactionResponse[],
-    lastNonce: number
-  ): number | undefined {
-    if(transactions[0] && transactions[0].nonce - lastNonce > 0) {
-      return lastNonce;
-    }
-
-    for(let i=0; i < transactions.length - 1; i++) {
-      if(transactions[i+1].nonce - (transactions[i].nonce + 1) > 0) {
-        return transactions[i].nonce + 1;
-      }
-    }
-
-    return;
   }
 
   private async submitTransaction(tx: providers.TransactionRequest): Promise<providers.TransactionResponse> {
