@@ -1,7 +1,8 @@
-import {Wallet, providers, BigNumber, utils} from "ethers";
-import {IWalletTransactionStorage, IWalletSourceStorage, SavedTransactionResponse} from "./@types/wallet";
-import {estimateGasPrice} from "./utils";
-import pushable, {Pushable} from "it-pushable";
+import { Wallet, providers, BigNumber, utils } from "ethers";
+import { IWalletTransactionStorage, IWalletSourceStorage } from "./@types/wallet";
+import { estimateGasPrice } from "./utils";
+import pushable, { Pushable } from "it-pushable";
+import { defaultLogger } from "./logger";
 
 export class ServerWeb3Wallet extends Wallet {
   private transactionQueue: Pushable<providers.TransactionRequest>;
@@ -85,38 +86,24 @@ export class ServerWeb3Wallet extends Wallet {
   }
 
   private async getNonce(): Promise<BigNumber> {
+    defaultLogger.debug("Tx without nonce, obtaining nonce");
     const transactions = await this.walletStorage.getTransactions(
       await this.getAddress()
     );
     const transactionCount = await this.getTransactionCount();
 
-    const gapNonce = this.findGapNonce(transactions, transactionCount);
-    if(gapNonce) {
-      return BigNumber.from(gapNonce);
-    }
+    let nonce = transactionCount;
 
     if(transactions.length) {
-      return BigNumber.from(transactions[transactions.length - 1].nonce + 1);
-    }
-
-    return BigNumber.from(transactionCount);
-  }
-
-  private findGapNonce(
-    transactions: SavedTransactionResponse[],
-    lastNonce: number
-  ): number | undefined {
-    if(transactions[0] && transactions[0].nonce - lastNonce > 0) {
-      return lastNonce;
-    }
-
-    for(let i=0; i < transactions.length - 1; i++) {
-      if(transactions[i+1].nonce - (transactions[i].nonce + 1) > 0) {
-        return transactions[i].nonce + 1;
+      const storedNonce = transactions[transactions.length - 1].nonce + 1;
+      //if stored nonce is lower than transaction count, we didn't store all transactions
+      if(storedNonce > nonce) {
+        defaultLogger.debug(`Stored nonce = ${storedNonce}, Account nonce = ${nonce}`);
+        nonce = storedNonce;
       }
     }
 
-    return;
+    return BigNumber.from(nonce);
   }
 
   private async submitTransaction(tx: providers.TransactionRequest): Promise<providers.TransactionResponse> {
