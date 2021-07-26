@@ -1,5 +1,15 @@
 # Changelog
 
+
+## [v1.2.0](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v1.2.0)
+
+[Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.1.2...v.1.2.0)
+
+### Fixed
+- delete old transactions
+- use tx count if higher than local tx nonce
+- update vulnerable dependency
+
 ## [v1.1.2](https://github.com/NodeFactoryIo/web3-server-wallet/tree/v1.1.2)
 
 [Full Changelog](https://github.com/NodeFactoryIo/web3-server-wallet/compare/v1.1.1...v.1.1.2)
